@@ -1,0 +1,227 @@
+---
+/**
+ * LearnFree · motor de contenido: vídeo-recurso destacado + recursos + publicación con Hostinger.
+ * Hostinger aparece en el paso donde hace falta: «ya tienes tu web → publícala».
+ */
+import { getCollection } from 'astro:content';
+import Eyebrow from '../ui/Eyebrow.astro';
+import Chip from '../ui/Chip.astro';
+import Button from '../ui/Button.astro';
+import Placeholder from '../ui/Placeholder.astro';
+import AffiliateLink from '../ui/AffiliateLink.astro';
+import { emph } from '../../lib/text';
+
+interface Props {
+  data: {
+    title: string;
+    intro: string;
+    featured: { eyebrow: string; title: string; summary: string; youtubeId: string; duration: string; href: string };
+    allLink: { label: string; href: string };
+    hosting: { text: string; linkLabel: string; disclosure: string };
+  };
+  hostingerUrl: string;
+}
+const { data, hostingerUrl } = Astro.props;
+const f = data.featured;
+const typeLabel = { tutorial: 'Tutorial', prompt: 'Prompt', checklist: 'Checklist', plantilla: 'Plantilla' } as const;
+const resources = (await getCollection('resources', (r) => r.data.featured))
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+const poster = f.youtubeId ? `https://i.ytimg.com/vi/${f.youtubeId}/maxresdefault.jpg` : '';
+---
+
+<section class="section learn" aria-labelledby="learn-title">
+  <div class="container">
+    <div class="section-head">
+      <h2 id="learn-title" set:html={emph(data.title)} />
+      <p>{data.intro}</p>
+    </div>
+
+    <div class="learn__grid">
+      <article class="video">
+        <a class="video__media" href={f.href} data-cta="learn_featured_video" data-placement="learn" data-intent="learn">
+          {
+            poster ? (
+              <img src={poster} alt="" width="1280" height="720" loading="lazy" decoding="async" />
+            ) : (
+              <Placeholder label="Miniatura del vídeo destacado" ratio="16/9" />
+            )
+          }
+          <span class="video__play" aria-hidden="true">
+            <svg viewBox="0 0 12 12"><path d="M3.5 1.8v8.4L10 6z"></path></svg>
+          </span>
+          <span class="video__duration mono">{f.duration}</span>
+        </a>
+        <div class="video__body">
+          {f.eyebrow && <Eyebrow>{f.eyebrow}</Eyebrow>}
+          <h3><a href={f.href}>{f.title}</a></h3>
+          <p>{f.summary}</p>
+        </div>
+      </article>
+
+      <div class="res">
+        <ul role="list" class="res__list">
+          {
+            resources.map((r) => (
+              <li>
+                <a class="res__item" href={`/recursos/${r.id}`} data-cta={`learn_resource_${r.id}`} data-placement="learn" data-intent="learn">
+                  <span class="res__meta">
+                    <Chip>{typeLabel[r.data.type]}</Chip>
+                    {r.data.gated && <span class="res__gated">Por email</span>}
+                  </span>
+                  <span class="res__title">{r.data.title}</span>
+                  <span class="res__arrow" aria-hidden="true">→</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <Button href={data.allLink.href} variant="text" arrow cta="learn_all" placement="learn" intent="learn">
+          {data.allLink.label}
+        </Button>
+      </div>
+    </div>
+
+    <aside class="publish" aria-label="Publicar tu web">
+      <p class="publish__text">{data.hosting.text}</p>
+      <div class="publish__action">
+        <AffiliateLink href={hostingerUrl} sourceType="home" sourceSlug="home" placement="learn_hosting">
+          {data.hosting.linkLabel}
+        </AffiliateLink>
+        <span class="publish__disclosure">{data.hosting.disclosure}</span>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .learn__grid {
+    display: grid;
+    gap: var(--s-6);
+    align-items: start;
+  }
+
+  @media (width >= 56rem) {
+    .learn__grid { grid-template-columns: 7fr 5fr; gap: var(--s-7); }
+  }
+
+  /* Vídeo destacado */
+  .video__media {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-lg);
+  }
+
+  .video__media img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+  .video__media :global(.ph) { border: 0; border-radius: 0; }
+
+  .video__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: var(--c-gold);
+    box-shadow: var(--shadow-cta);
+    transform: translate(-50%, -50%);
+    transition: transform var(--t-med) var(--ease);
+  }
+
+  .video__play svg { width: 22px; height: 22px; margin-left: 3px; fill: var(--c-on-gold); }
+  .video__media:hover .video__play { transform: translate(-50%, -50%) scale(1.08); }
+
+  .video__duration {
+    position: absolute;
+    right: var(--s-3);
+    bottom: var(--s-3);
+    padding: 4px 10px;
+    border-radius: var(--r-full);
+    background: var(--c-bg);
+    color: var(--c-ink);
+  }
+
+  .video__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+    margin-top: var(--s-4);
+  }
+
+  .video__body h3 a { color: var(--c-ink); }
+  .video__body h3 a:hover { color: var(--c-gold); }
+
+  /* Recursos */
+  .res { display: flex; flex-direction: column; gap: var(--s-4); }
+  .res__list { border-top: 1px solid var(--c-line); }
+
+  .res__item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--s-2) var(--s-3);
+    align-items: center;
+    padding-block: var(--s-4);
+    border-bottom: 1px solid var(--c-line);
+    color: var(--c-ink);
+  }
+
+  .res__meta {
+    display: flex;
+    grid-column: 1 / -1;
+    gap: var(--s-2);
+    align-items: center;
+  }
+
+  .res__gated {
+    color: var(--c-gold);
+    font-family: var(--f-mono);
+    font-size: var(--fs-mono);
+  }
+
+  .res__title {
+    font-family: var(--f-display);
+    font-size: 1.375rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .res__arrow {
+    color: var(--c-gold);
+    transition: transform var(--t-fast) var(--ease);
+  }
+
+  .res__item:hover { color: var(--c-ink); }
+  .res__item:hover .res__arrow { transform: translateX(6px); }
+
+  /* Publicación · Hostinger */
+  .publish {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3) var(--s-6);
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--s-7);
+    padding: var(--s-4) var(--s-4) var(--s-4) var(--s-5);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-md);
+    background: var(--c-surface);
+  }
+
+  .publish__text {
+    flex: 1 1 420px;
+    max-width: 640px;
+    font-size: var(--fs-small);
+  }
+
+  .publish__action { display: flex; flex-direction: column; }
+
+  .publish__disclosure {
+    color: var(--c-meta);
+    font-size: var(--fs-micro);
+  }
+</style>

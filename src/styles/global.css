@@ -1,0 +1,249 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+@import "./tokens.css" layer(tokens);
+
+/* ── Reset ──────────────────────────────── */
+@layer reset {
+  *,
+  *::before,
+  *::after { box-sizing: border-box; }
+
+  * { margin: 0; }
+
+  html {
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+  }
+
+  img,
+  picture,
+  svg,
+  video { display: block; max-width: 100%; }
+
+  input,
+  button,
+  textarea,
+  select { font: inherit; color: inherit; }
+
+  button { cursor: pointer; }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4 { overflow-wrap: break-word; }
+
+  ul[role="list"],
+  ol[role="list"] { list-style: none; padding: 0; }
+}
+
+/* ── Base ───────────────────────────────── */
+@layer base {
+  html {
+    color-scheme: dark;
+    background: var(--c-bg);
+    scroll-behavior: smooth;
+    scroll-padding-top: 88px;
+  }
+
+  body {
+    min-height: 100svh;
+    overflow-x: clip;
+    background-color: var(--c-bg);
+
+    /* grano estático (sin capa fija con blend: barato de pintar) */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.93 0 0 0 0 0.8 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    color: var(--c-text);
+    font-family: var(--f-sans);
+    font-size: var(--fs-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizelegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  h2 {
+    font-size: var(--fs-h2);
+    line-height: 0.94;
+    letter-spacing: -0.04em;
+  }
+
+  h3 {
+    font-size: var(--fs-h3);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  p { text-wrap: pretty; }
+
+  a {
+    color: var(--c-ink);
+    text-decoration: none;
+    transition: color var(--t-fast) ease;
+  }
+
+  a:hover { color: var(--c-gold); }
+
+  strong { color: var(--c-ink); font-weight: 500; }
+
+  ::selection { background: var(--c-gold); color: var(--c-on-gold); }
+
+  :focus-visible {
+    outline: 2px solid var(--c-gold);
+    outline-offset: 3px;
+    border-radius: var(--r-sm);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.15s !important;
+    }
+  }
+}
+
+/* ── Layout ─────────────────────────────── */
+@layer layout {
+  .container {
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .section {
+    position: relative;
+    padding-block: var(--section-y);
+    border-top: 1px solid var(--c-line);
+  }
+
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--s-4) var(--s-6);
+    margin-bottom: var(--s-7);
+  }
+
+  .section-head > h2 { flex: 1 1 520px; max-width: 16ch; }
+
+  .section-head > p {
+    flex: 0 1 420px;
+    font-size: var(--fs-body-lg);
+    line-height: 1.6;
+  }
+}
+
+/* ── Componentes compartidos ────────────── */
+@layer components {
+  /*
+   * Tarjetas apiladas (ver lib/stack.ts). Se agrupan al bajar y se separan al subir.
+   * Solo con altura suficiente; en pantallas bajas, flujo normal.
+   */
+  .stack {
+    display: grid;
+    gap: var(--s-4);
+  }
+
+  .stack__card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: var(--c-surface);
+    transform-origin: 50% 0;
+  }
+
+  .stack__card::after {
+    position: absolute;
+    inset: 0;
+    background: var(--c-bg);
+    content: "";
+    opacity: calc(var(--p, 0) * 0.55);
+    pointer-events: none;
+  }
+
+  .stack__count {
+    color: var(--c-meta);
+    font-family: var(--f-mono);
+    font-size: var(--fs-mono);
+  }
+
+  .stack__count b { color: var(--c-ink); font-weight: 500; }
+
+  @media (height >= 40rem) {
+    .stack { gap: var(--s-7); padding-bottom: var(--s-6); }
+
+    .stack__card {
+      position: sticky;
+      top: calc(var(--stack-top, 88px) + var(--i, 0) * var(--stack-step, 20px));
+      transform: scale(calc(1 - var(--p, 0) * 0.05));
+      will-change: transform;
+    }
+  }
+}
+
+/* ── Utilidades ─────────────────────────── */
+@layer utilities {
+  .visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  /* Énfasis serif del manual: 1–3 palabras por titular */
+  .serif-em {
+    padding-right: 0.06em;
+    font-family: var(--f-serif);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+
+  .serif-em--gold { color: var(--c-gold); }
+
+  .mono {
+    font-family: var(--f-mono);
+    font-size: var(--fs-mono);
+    letter-spacing: 0.02em;
+  }
+
+  .placeholder-text { color: var(--c-gold-light); }
+
+  .skip-link {
+    position: absolute;
+    top: var(--s-2);
+    left: var(--s-2);
+    z-index: 100;
+    padding: var(--s-2) var(--s-3);
+    border-radius: var(--r-full);
+    background: var(--c-gold);
+    color: var(--c-on-gold);
+    font-weight: 700;
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus { transform: none; color: var(--c-on-gold); }
+}

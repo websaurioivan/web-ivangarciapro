@@ -1,0 +1,22 @@
+name: Web corporativa
+order: 1
+forWho: Para empresas que necesitan transmitir confianza y convertir visitas en clientes.
+includes:
+  - Diseño único, sin plantillas
+  - Textos orientados a conversión
+  - SEO técnico de base
+  - Panel para editar tus textos
+plans:
+  - mode: unico
+    price: '[1.790 €]'
+    provisional: true
+  - mode: fraccionado
+    price: '[1.790 €]'
+    monthly: '[3 × 597 €]'
+    provisional: true
+  - mode: renting
+    price: ''
+    upfront: '[199 €]'
+    monthly: '[79 €/mes]'
+    months: 24
+    provisional: true

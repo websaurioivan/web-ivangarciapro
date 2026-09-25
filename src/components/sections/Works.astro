@@ -1,0 +1,166 @@
+---
+/**
+ * Works · trabajos reales en tarjetas apiladas (se agrupan al hacer scroll).
+ * Datos: colección `cases` (featured). Sin resultados inventados: `result` solo se muestra si existe.
+ */
+import { getCollection } from 'astro:content';
+import BrowserFrame from '../ui/BrowserFrame.astro';
+import Placeholder from '../ui/Placeholder.astro';
+import Chip from '../ui/Chip.astro';
+import Button from '../ui/Button.astro';
+import { emph } from '../../lib/text';
+
+interface Props {
+  data: { title: string; intro: string; link: { label: string; href: string } };
+}
+const { data } = Astro.props;
+const cases = (await getCollection('cases', (c) => c.data.featured)).sort((a, b) => a.data.order - b.data.order);
+const total = String(cases.length).padStart(2, '0');
+const host = (u: string) => {
+  try {
+    return new URL(u).host;
+  } catch {
+    return '';
+  }
+};
+---
+
+<section class="section works" aria-labelledby="works-title">
+  <div class="container">
+    <div class="section-head">
+      <h2 id="works-title" set:html={emph(data.title)} />
+      <p>{data.intro}</p>
+    </div>
+
+    <div class="stack" data-stack>
+      {
+        cases.map((c, i) => (
+          <article class="stack__card case" style={`--i:${i}`}>
+            <div class="case__body">
+              <p class="stack__count">
+                <b>{String(i + 1).padStart(2, '0')}</b> / {total} · {c.data.sector}
+              </p>
+              <h3 class="case__title">{c.data.title}</h3>
+              <dl class="case__rows">
+                <div>
+                  <dt>Necesitaba</dt>
+                  <dd>{c.data.need}</dd>
+                </div>
+                <div>
+                  <dt>Hicimos</dt>
+                  <dd>{c.data.done}</dd>
+                </div>
+                {c.data.result && (
+                  <div>
+                    <dt>Resultado</dt>
+                    <dd class="case__result">{c.data.result}</dd>
+                  </div>
+                )}
+              </dl>
+              <div class="case__foot">
+                <div class="case__chips">
+                  {c.data.tags.map((t) => (
+                    <Chip>{t}</Chip>
+                  ))}
+                </div>
+                {c.data.url && (
+                  <a class="case__link" href={c.data.url} rel="noopener" target="_blank">
+                    Ver la web publicada <span aria-hidden="true">↗</span>
+                  </a>
+                )}
+              </div>
+            </div>
+            <BrowserFrame url={host(c.data.url) || c.data.title} class="case__frame">
+              <Placeholder label={`Captura de ${c.data.title}`} ratio="16/10" class="case__shot" />
+            </BrowserFrame>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="works__foot">
+      <Button href={data.link.href} variant="text" arrow cta="works_service" placement="works" intent="service">
+        {data.link.label}
+      </Button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .case {
+    display: grid;
+    gap: var(--s-5);
+    padding: var(--s-4);
+  }
+
+  @media (width >= 56rem) {
+    .case {
+      grid-template-columns: 5fr 7fr;
+      gap: var(--s-6);
+      align-items: stretch;
+      padding: var(--s-6);
+    }
+  }
+
+  .case__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+  }
+
+  .case__title {
+    margin-top: var(--s-2);
+    font-size: clamp(1.75rem, 3.4vw, 3rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+
+  @media (width >= 56rem) {
+    .case__title { margin-top: auto; }
+  }
+
+  .case__rows { border-top: 1px solid var(--c-line); }
+
+  .case__rows > div {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: var(--s-3);
+    padding-block: var(--s-3);
+    border-bottom: 1px solid var(--c-line);
+  }
+
+  .case__rows dt {
+    padding-top: 3px;
+    color: var(--c-meta);
+    font-family: var(--f-mono);
+    font-size: var(--fs-mono);
+  }
+
+  .case__rows dd { margin: 0; font-size: var(--fs-small); }
+  .case__result { color: var(--c-ink); }
+
+  .case__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-3);
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .case__chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+
+  .case__link {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    min-height: 44px;
+    font-size: var(--fs-small);
+    font-weight: 500;
+  }
+
+  .case :global(.case__frame) { align-self: center; box-shadow: none; }
+  .case :global(.case__shot) { border: 0; border-radius: 0; }
+
+  .works__foot { margin-top: var(--s-5); }
+</style>

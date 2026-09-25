@@ -1,0 +1,459 @@
+---
+/**
+ * Testimonios · CARRUSEL (diseño activo en la Home).
+ * - Escritorio: 3 tarjetas, flechas a los lados. Tablet: 2. Móvil: 1 tarjeta + asomo de la siguiente, swipe nativo.
+ * - Avance automático cada `interval` ms: se para con hover, foco, pestaña oculta, fuera de pantalla,
+ *   botón de pausa (WCAG 2.2.2) o prefers-reduced-motion. Flechas del teclado dentro del carrusel.
+ * - Valoración media y nº de reseñas SOLO con datos reales (si no, placeholders visibles).
+ * <Carousel id="tst" title="Lo que dicen *mis clientes*" items={await getTestimonials()} reviews={settings.reviews} />
+ */
+import { emph } from '../../lib/text';
+import { pad2 as pad, starText as stars, type Testimonial, type ReviewsSummary } from '../../lib/testimonials';
+
+interface Props {
+  id: string;
+  title: string;
+  items: Testimonial[];
+  reviews?: ReviewsSummary | undefined;
+  interval?: number;
+}
+const { id, title, items, reviews: rating, interval = 5000 } = Astro.props;
+---
+
+<section class="section tc" aria-labelledby={`${id}-title`}>
+  <div class="tc__glow" aria-hidden="true"></div>
+  <div class="container">
+    <div class="tc__head">
+      <h2 id={`${id}-title`} set:html={emph(title)} />
+      {
+        rating?.value && (
+          <div class="tc__rating">
+            <p class="tc__score">
+              {rating.value}
+              <span>/5</span>
+            </p>
+            <p class="tc__stars" aria-hidden="true">
+              {stars()}
+            </p>
+            <p class="tc__count">Basado en {rating.count} reseñas</p>
+            {rating.url.startsWith('http') ? (
+              <a class="tc__google" href={rating.url} rel="noopener" target="_blank">
+                Ver reseñas en Google <span aria-hidden="true">↗</span>
+              </a>
+            ) : (
+              <span class="tc__count">{rating.url}</span>
+            )}
+          </div>
+        )
+      }
+    </div>
+
+    <div
+      class="tc__carousel"
+      data-carousel
+      data-interval={String(interval)}
+      role="region"
+      aria-roledescription="carrusel"
+      aria-label="Testimonios de clientes"
+    >
+      <button type="button" class="tc__arrow tc__arrow--prev" data-prev aria-label="Testimonio anterior">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5"></path></svg>
+      </button>
+
+      <ul class="tc__track" data-track role="list" tabindex="0" aria-label="Lista de testimonios, desliza o usa las flechas">
+        {
+          items.map((t, i) => (
+            <li class="tc__slide" role="group" aria-roledescription="testimonio" aria-label={`${i + 1} de ${items.length}`}>
+              <figure class="tc__card">
+                <p class="tc__card-stars" aria-label={`${t.rating} de 5 estrellas`}>
+                  {stars(t.rating)}
+                </p>
+                <blockquote class="tc__quote">{t.quote}</blockquote>
+                <figcaption class="tc__author">
+                  <span class="tc__avatar" aria-hidden="true">
+                    {t.initial}
+                  </span>
+                  <span>
+                    <strong>{t.name}</strong>
+                    <small>{t.role}</small>
+                  </span>
+                </figcaption>
+              </figure>
+            </li>
+          ))
+        }
+      </ul>
+
+      <button type="button" class="tc__arrow tc__arrow--next" data-next aria-label="Testimonio siguiente">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"></path></svg>
+      </button>
+
+      <div class="tc__bar">
+        <span class="tc__counter mono" aria-hidden="true"><b data-current>01</b> / {pad(items.length)}</span>
+        <span class="tc__progress" aria-hidden="true"><span data-progress></span></span>
+        <div class="tc__mobile-arrows">
+          <button type="button" class="tc__arrow tc__arrow--sm" data-prev aria-label="Testimonio anterior">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5"></path></svg>
+          </button>
+          <button type="button" class="tc__arrow tc__arrow--sm" data-next aria-label="Testimonio siguiente">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"></path></svg>
+          </button>
+        </div>
+        <button type="button" class="tc__pause" data-pause aria-pressed="false">
+          <span data-pause-label>Pausar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((root) => {
+    const track = root.querySelector<HTMLElement>('[data-track]')!;
+    const slides = [...track.children] as HTMLElement[];
+    const current = root.querySelector<HTMLElement>('[data-current]');
+    const progress = root.querySelector<HTMLElement>('[data-progress]');
+    const pauseBtn = root.querySelector<HTMLButtonElement>('[data-pause]');
+    const pauseLabel = root.querySelector<HTMLElement>('[data-pause-label]');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const interval = Number(root.dataset.interval) || 5000;
+    const behavior = (): ScrollBehavior => (reduce.matches ? 'auto' : 'smooth');
+
+    let userPaused = reduce.matches;
+    let hover = false;
+    let focus = false;
+    let visible = false;
+    let timer: number | undefined;
+
+    const step = () => {
+      const a = slides[0]!.getBoundingClientRect();
+      const b = slides[1]?.getBoundingClientRect();
+      return b ? b.left - a.left : a.width;
+    };
+    const index = () => Math.round(track.scrollLeft / step());
+    const atEnd = () => track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+
+    const go = (dir: 1 | -1) => {
+      if (dir === 1 && atEnd()) track.scrollTo({ left: 0, behavior: behavior() });
+      else if (dir === -1 && track.scrollLeft <= 4) track.scrollTo({ left: track.scrollWidth, behavior: behavior() });
+      else track.scrollBy({ left: dir * step(), behavior: behavior() });
+    };
+
+    const restartProgress = () => {
+      if (!progress) return;
+      progress.style.animation = 'none';
+      void progress.offsetWidth;
+      progress.style.animation = '';
+    };
+
+    const running = () => !userPaused && !hover && !focus && visible && !document.hidden;
+    const sync = () => {
+      window.clearInterval(timer);
+      root.toggleAttribute('data-running', running());
+      if (running()) {
+        restartProgress();
+        timer = window.setInterval(() => {
+          go(1);
+          restartProgress();
+        }, interval);
+      }
+    };
+
+    root.querySelectorAll('[data-next]').forEach((b) => b.addEventListener('click', () => { go(1); sync(); }));
+    root.querySelectorAll('[data-prev]').forEach((b) => b.addEventListener('click', () => { go(-1); sync(); }));
+
+    track.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(1); sync(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); sync(); }
+    });
+
+    let raf = 0;
+    track.addEventListener('scroll', () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        if (current) current.textContent = String(Math.min(slides.length, index() + 1)).padStart(2, '0');
+      });
+    }, { passive: true });
+
+    root.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { hover = true; sync(); } });
+    root.addEventListener('pointerleave', () => { hover = false; sync(); });
+    root.addEventListener('focusin', () => { focus = true; sync(); });
+    root.addEventListener('focusout', (e) => {
+      if (!root.contains(e.relatedTarget as Node)) { focus = false; sync(); }
+    });
+    track.addEventListener('touchstart', () => { hover = true; sync(); }, { passive: true });
+    track.addEventListener('touchend', () => { window.setTimeout(() => { hover = false; sync(); }, 4000); }, { passive: true });
+
+    pauseBtn?.addEventListener('click', () => {
+      userPaused = !userPaused;
+      pauseBtn.setAttribute('aria-pressed', String(userPaused));
+      if (pauseLabel) pauseLabel.textContent = userPaused ? 'Reanudar' : 'Pausar';
+      sync();
+    });
+    if (userPaused && pauseBtn) {
+      pauseBtn.setAttribute('aria-pressed', 'true');
+      if (pauseLabel) pauseLabel.textContent = 'Reanudar';
+    }
+
+    new IntersectionObserver(([e]) => { visible = !!e?.isIntersecting; sync(); }, { threshold: 0.3 }).observe(root);
+    document.addEventListener('visibilitychange', sync);
+    root.style.setProperty('--tc-interval', `${interval}ms`);
+  });
+</script>
+
+<style>
+  .tc { overflow: hidden; }
+
+  .tc__glow {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    width: min(1100px, 150vw);
+    height: 700px;
+    border-radius: 50%;
+    background: var(--g-glow);
+    opacity: 0.14;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .tc .container { position: relative; }
+
+  /* Cabecera + valoración */
+  .tc__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-5) var(--s-6);
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: var(--s-6);
+  }
+
+  .tc__head h2 { max-width: 14ch; }
+
+  .tc__rating {
+    display: grid;
+    gap: 6px;
+    min-width: 200px;
+  }
+
+  .tc__score {
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: clamp(2.5rem, 4vw, 3.5rem);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .tc__score span { color: var(--c-meta); font-size: 0.45em; letter-spacing: 0; }
+
+  .tc__stars,
+  .tc__card-stars {
+    color: var(--c-gold);
+    font-size: 0.9375rem;
+    letter-spacing: 0.18em;
+  }
+
+  .tc__count { color: var(--c-meta); font-size: var(--fs-micro); }
+
+  .tc__google {
+    font-size: var(--fs-micro);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Carrusel */
+  .tc__carousel {
+    --gap: var(--s-3);
+    --per: 1.12;
+
+    position: relative;
+  }
+
+  @media (width >= 40rem) { .tc__carousel { --per: 2; --gap: var(--s-4); } }
+  @media (width >= 64rem) { .tc__carousel { --per: 3; } }
+
+  .tc__track {
+    display: flex;
+    gap: var(--gap);
+    margin: 0;
+    padding: 0 0 var(--s-2);
+    overflow-x: auto;
+    list-style: none;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .tc__track::-webkit-scrollbar { display: none; }
+
+  .tc__track:focus-visible {
+    outline: 2px solid var(--c-gold);
+    outline-offset: 6px;
+    border-radius: var(--r-lg);
+  }
+
+  .tc__slide {
+    flex: 0 0 calc((100% - (var(--per) - 1) * var(--gap)) / var(--per));
+    scroll-snap-align: start;
+  }
+
+  .tc__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+    height: 100%;
+    margin: 0;
+    padding: var(--s-5);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: var(--c-surface);
+    transition: border-color var(--t-med) ease, transform var(--t-med) var(--ease);
+  }
+
+  .tc__card:hover { border-color: var(--c-gold-45); }
+
+  .tc__quote {
+    flex: 1;
+    margin: 0;
+    color: var(--c-ink);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+
+  .tc__author {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--c-line);
+  }
+
+  .tc__avatar {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--c-gold-28);
+    border-radius: 50%;
+    background: var(--c-surface-2);
+    color: var(--c-gold);
+    font-family: var(--f-serif);
+    font-size: 1.375rem;
+    font-style: italic;
+  }
+
+  .tc__author strong { display: block; font-size: var(--fs-small); }
+  .tc__author small { display: block; color: var(--c-meta); font-size: var(--fs-micro); }
+
+  /* Flechas laterales (escritorio) */
+  .tc__arrow {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border: 1px solid var(--c-ghost-border);
+    border-radius: 50%;
+    background: var(--c-bg);
+    color: var(--c-ink);
+    transition: border-color var(--t-fast) ease, color var(--t-fast) ease, transform var(--t-fast) var(--ease);
+  }
+
+  .tc__arrow:hover { border-color: var(--c-gold-60); color: var(--c-gold); }
+
+  .tc__arrow svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
+  }
+
+  .tc__arrow--prev,
+  .tc__arrow--next {
+    position: absolute;
+    top: calc(50% - 32px);
+    z-index: 2;
+    display: none;
+    translate: 0 -50%;
+  }
+
+  .tc__arrow--prev { left: -26px; }
+  .tc__arrow--next { right: -26px; }
+  .tc__arrow--prev:hover { transform: translateX(-3px); }
+  .tc__arrow--next:hover { transform: translateX(3px); }
+
+  @media (width >= 64rem) {
+    .tc__arrow--prev,
+    .tc__arrow--next { display: grid; }
+  }
+
+  @media (width >= 64rem) and (width < 90rem) {
+    .tc__arrow--prev { left: -12px; }
+    .tc__arrow--next { right: -12px; }
+  }
+
+  /* Barra inferior: contador, progreso, flechas móviles, pausa */
+  .tc__bar {
+    display: flex;
+    gap: var(--s-3);
+    align-items: center;
+    margin-top: var(--s-4);
+  }
+
+  .tc__counter { color: var(--c-meta); }
+  .tc__counter b { color: var(--c-ink); font-weight: 500; }
+
+  .tc__progress {
+    position: relative;
+    flex: 1;
+    height: 2px;
+    overflow: hidden;
+    border-radius: var(--r-full);
+    background: var(--c-line-strong);
+  }
+
+  .tc__progress span {
+    position: absolute;
+    inset: 0;
+    background: var(--c-gold);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  .tc__carousel[data-running] .tc__progress span {
+    animation: tc-progress var(--tc-interval, 5000ms) linear forwards;
+  }
+
+  @keyframes tc-progress {
+    to { transform: scaleX(1); }
+  }
+
+  .tc__mobile-arrows { display: flex; gap: var(--s-2); }
+  .tc__arrow--sm { width: 44px; height: 44px; }
+
+  @media (width >= 64rem) {
+    .tc__mobile-arrows { display: none; }
+  }
+
+  .tc__pause {
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-full);
+    background: transparent;
+    color: var(--c-meta);
+    font-size: var(--fs-micro);
+  }
+
+  .tc__pause:hover { border-color: var(--c-gold-60); color: var(--c-ink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tc__progress { visibility: hidden; }
+  }
+</style>

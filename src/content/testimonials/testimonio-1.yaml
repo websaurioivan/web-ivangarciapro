@@ -1,0 +1,9 @@
+name: '[Nombre del cliente 1]'
+role: '[Cargo · Negocio]'
+url: ''
+quote: '[Testimonio real 1: qué necesitaba, cómo fue el proceso y qué cambió cuando tuvo su web. Mejor 2–4 frases.]'
+short: '[Frase corta del testimonio 1]'
+before: '[Cómo era antes: el problema, en una frase]'
+rating: 5
+order: 1
+featured: true

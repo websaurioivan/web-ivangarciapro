@@ -1,0 +1,114 @@
+{
+  "seo": {
+    "title": "Diseño web profesional para autónomos y empresas · Iván García",
+    "description": "Diseño web profesional, rápido y preparado para Google. Te enseño un prototipo gratis en 24 horas y solo pagas si te gusta. Web lista en 7 días, sin WordPress."
+  },
+  "hero": {
+    "title": "Diseño web profesional, *sin* complicarte",
+    "subtitle": "Diseño único, rápida y preparada para Google. Te enseño un prototipo en 24 horas y solo pagas si te gusta.",
+    "primary": { "label": "Quiero mi prototipo gratis", "href": "#prototipo" },
+    "secondary": { "label": "Ver trabajos", "href": "#trabajos" },
+    "timeline": [
+      { "when": "Hoy", "what": "Me cuentas tu negocio en 2 minutos" },
+      { "when": "24 h", "what": "Ves tu prototipo navegable" },
+      { "when": "Si te gusta", "what": "Eliges cómo pagar" },
+      { "when": "7 días", "what": "Tu web publicada y lista" }
+    ],
+    "timelineNote": "Sin compromiso · Solo pagas si te gusta"
+  },
+  "works": {
+    "title": "Webs reales, *resultados* reales",
+    "intro": "Antes de pedirme nada, mira lo que hago.",
+    "link": { "label": "Quiero la mía", "href": "#prototipo" }
+  },
+  "fears": {
+    "title": "Lo que te preocupa, *resuelto*",
+    "intro": "Si ya has pagado una web que no funcionó, es normal desconfiar. Así lo resuelvo.",
+    "rows": [
+      { "fear": "Volver a pagar una web que no vende", "answer": "Ves el prototipo antes de pagar. Si no te convence, no pagas nada." },
+      { "fear": "Proyectos que no terminan nunca", "answer": "Tu web lista en 7 días desde que me das luz verde." },
+      { "fear": "Mantenimiento y sustos", "answer": "Sin WordPress ni plugins que se rompan. Hosting, dominio y mantenimiento incluidos el primer año." },
+      { "fear": "Costes ocultos", "answer": "Precio cerrado. Lo que no está incluido se presupuesta antes de hacerlo." },
+      { "fear": "Proveedores que desaparecen", "answer": "Hablas directamente conmigo, sin intermediarios." },
+      { "fear": "Depender de un técnico", "answer": "Cambias tus textos tú, desde un panel sencillo. Y la web es tuya." }
+    ]
+  },
+  "process": {
+    "title": "Así *funciona*",
+    "intro": "Cuatro pasos. Tú solo tienes que decir sí.",
+    "steps": [
+      { "title": "Pides tu prototipo", "text": "Un formulario de dos minutos: tu negocio, tu contacto y qué quieres conseguir." },
+      { "title": "Lo recibes en 24 horas", "text": "Tu página principal, navegable, en una dirección privada. Pedidos de lunes a jueves; si lo pides de viernes a domingo, lo tienes el [lunes]." },
+      { "title": "Si te gusta, eliges cómo pagar", "text": "Pago único, en 3 meses sin intereses o renting mensual." },
+      { "title": "Tu web lista en 7 días", "text": "Publicada, con tu dominio, y te enseño a editarla desde tu panel." }
+    ]
+  },
+  "plans": {
+    "title": "Qué web *necesitas*",
+    "intro": "Tres formatos, un mismo estándar. Todos incluyen 1 año de hosting, dominio y mantenimiento.",
+    "delivery": "7 días",
+    "note": "Precios orientativos."
+  },
+  "modes": {
+    "title": "Elige cómo *pagar*",
+    "intro": "La misma web y lo mismo incluido. Solo cambia cómo la pagas.",
+    "columns": ["Pago único", "Fraccionado", "Renting"],
+    "rows": [
+      { "label": "Cómo pagas", "values": ["Todo al empezar", "En 3 meses, sin intereses", "Cuota inicial + cuota mensual"] },
+      { "label": "Permanencia", "values": ["—", "—", "24 meses"] },
+      { "label": "Hosting, dominio y mantenimiento", "values": ["1 año incluido", "1 año incluido", "Incluido durante el renting"] },
+      { "label": "Panel para editar tu web", "values": ["✓", "✓", "✓"] },
+      { "label": "Entrega", "values": ["7 días", "7 días", "7 días"] },
+      { "label": "Cambios en la web", "values": ["Servicio extra", "Servicio extra", "Servicio extra"] },
+      { "label": "La web es tuya", "values": ["Desde el pago", "Al completar los 3 pagos", "Al terminar los 24 meses"] },
+      { "label": "Si quieres salir antes", "values": ["—", "—", "Pasas a pago único, o pagas el importe completo de la web"] }
+    ],
+    "extrasTitle": "Servicios extra · precio a consultar",
+    "extras": ["Cambios en la web", "Páginas adicionales", "Google Ads", "SEO local"]
+  },
+  "compare": {
+    "title": "Sin WordPress. *Sin* mantenimiento.",
+    "intro": "Con la IA, montar tu web sobre WordPress es pagar cada año por complejidad que no necesitas. Tu web no depende de plugins ni de actualizaciones: por eso no hay que mantenerla.",
+    "rows": [
+      { "yes": "Ningún plugin que actualizar ni que se rompa", "no": "Actualizaciones de plugins cada semana" },
+      { "yes": "Carga al instante, también en el móvil", "no": "Páginas lentas cargadas de complementos" },
+      { "yes": "Sin panel ni base de datos expuestos", "no": "Un panel y una base de datos que hay que proteger" },
+      { "yes": "Cambias tus textos tú, desde un panel sencillo", "no": "Llamar a un técnico para cada cambio" },
+      { "yes": "Pagas tu web, no licencias cada año", "no": "Licencias de temas y plugins que se renuevan" },
+      { "yes": "Diseño único, hecho para tu negocio", "no": "Una plantilla que usan miles de webs" }
+    ]
+  },
+  "testimonials": {
+    "title": "Lo que *cambió*"
+  },
+  "faq": {
+    "title": "Preguntas *frecuentes*",
+    "items": [
+      { "q": "¿Qué incluye el prototipo gratis?", "a": "La página principal de tu web, navegable, en una dirección privada. Con tu sector, tu propuesta y tu estilo, para que veas el resultado antes de decidir." },
+      { "q": "¿Cuándo lo recibo?", "a": "En 24 horas si lo pides de lunes a jueves. Si lo pides de viernes a domingo, lo tienes el [lunes]." },
+      { "q": "¿Por qué solo 10 prototipos por semana?", "a": "Porque cada prototipo lo hago yo, a medida. Prefiero hacer 10 bien que 50 a medias." },
+      { "q": "¿Y si no me gusta?", "a": "No pagas nada. El prototipo es gratis y sin compromiso." },
+      { "q": "¿Cuánto tarda la web completa?", "a": "7 días desde que eliges modalidad y me envías tus textos e imágenes." },
+      { "q": "¿Qué incluye el precio?", "a": "Diseño único, textos orientados a vender, adaptación a móvil, SEO técnico de base, panel para editar tu web y 1 año de hosting, dominio y mantenimiento. Es igual en todas las modalidades." },
+      { "q": "¿Qué pasa después del primer año?", "a": "Puedes renovar conmigo [precio de renovación a consultar] o llevar la web a tu propio hosting. Si lo prefieres, te ayudo con mis vídeos a contratar Hostinger y migrarla sin complicaciones." },
+      { "q": "¿Puedo cancelar el renting?", "a": "El renting tiene una permanencia de 24 meses. Puedes pasarte a pago único cuando quieras. Si cancelas antes sin pasarte a pago único, la penalización es el importe completo de la web." },
+      { "q": "¿La web es mía?", "a": "Sí. Con pago único, desde que la pagas; fraccionado, al completar los 3 pagos; en renting, al terminar los 24 meses o al pasarte a pago único." },
+      { "q": "¿Puedo cambiar los textos yo?", "a": "Sí. Tienes un panel sencillo para editar textos e imágenes sin tocar código. Te enseño a usarlo en la entrega." },
+      { "q": "¿Y si necesito cambios más grandes?", "a": "Cambios de diseño, páginas nuevas, Google Ads o SEO local se contratan como servicios extra. Te paso presupuesto antes, sin sorpresas." },
+      { "q": "¿Por qué no usas WordPress?", "a": "Porque obliga a mantener plugins, actualizaciones y seguridad todo el año. Mis webs son más rápidas y no necesitan ese mantenimiento." },
+      { "q": "¿Aparecerá mi web en Google?", "a": "Sale preparada para Google: rápida, bien estructurada y con el SEO técnico hecho. Nadie serio puede garantizarte una posición; si quieres ir más allá, el SEO local está disponible como extra." },
+      { "q": "¿Trabajas fuera de España?", "a": "Sí. Trabajo con negocios de cualquier país de habla hispana." }
+    ]
+  },
+  "form": {
+    "title": "Pide tu prototipo *gratis*",
+    "intro": "Dos minutos. En 24 horas tienes tu prototipo y decides sin compromiso.",
+    "button": "Quiero mi prototipo gratis",
+    "microcopy": "Sin compromiso · Solo uso tus datos para preparar tu prototipo",
+    "success": "Recibido. Te escribo con tu prototipo en 24 horas (pedidos de lunes a jueves).",
+    "waitlistTitle": "Esta semana ya no quedan prototipos",
+    "waitlistText": "Déjame tus datos y te reservo uno de los primeros de la semana que viene.",
+    "waitlistButton": "Reservar para la próxima semana",
+    "waitlistSuccess": "Reservado. Te escribo en cuanto se abra el cupo de la próxima semana."
+  }
+}

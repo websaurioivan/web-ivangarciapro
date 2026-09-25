@@ -1,0 +1,11 @@
+title: '[Proyecto real 1]'
+client: '[Cliente]'
+sector: '[Sector]'
+url: ''
+need: '[Qué necesitaba el negocio, en una frase.]'
+done: '[Qué hicimos, en una frase.]'
+result: ''
+tags:
+  - '[Web corporativa]'
+order: 1
+featured: true

@@ -1,0 +1,38 @@
+---
+/**
+ * QuotaEyebrow · etiqueta viva con el cupo REAL de prototipos de la semana (/api/cupos.php).
+ * Sin respuesta del servidor → muestra el límite («Máximo 10 por semana»), nunca un número inventado.
+ * <QuotaEyebrow perWeek={settings.prototypesPerWeek} />
+ */
+import Eyebrow from '../ui/Eyebrow.astro';
+
+interface Props {
+  perWeek: number;
+}
+const { perWeek } = Astro.props;
+---
+
+<Eyebrow data-quota data-per-week={String(perWeek)}>Máximo {perWeek} prototipos por semana</Eyebrow>
+
+<script>
+  const els = document.querySelectorAll<HTMLElement>('[data-quota]');
+  if (els.length) {
+    fetch('/api/cupos.php', { headers: { Accept: 'application/json' } })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d: { restantes?: number; total?: number }) => {
+        if (typeof d.restantes !== 'number') return;
+        const restantes = d.restantes;
+        document.documentElement.dataset.quota = String(restantes);
+        els.forEach((el) => {
+          const text = el.querySelector('.eyebrow__text');
+          if (!text) return;
+          text.textContent =
+            restantes > 0
+              ? `Quedan ${restantes} de ${d.total ?? el.dataset.perWeek} prototipos esta semana`
+              : 'Cupo completo esta semana · lista de espera abierta';
+        });
+        document.dispatchEvent(new CustomEvent('quota', { detail: restantes }));
+      })
+      .catch(() => {});
+  }
+</script>

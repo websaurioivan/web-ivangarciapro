@@ -1,0 +1,66 @@
+---
+/**
+ * StickyCta · barra inferior en móvil con el CTA principal de la página.
+ * Aparece al salir del hero ([data-hero]) y se oculta cuando hay otro CTA de oro o un formulario a la vista ([data-gold-zone]),
+ * para respetar «un único CTA de oro por pantalla».
+ * <StickyCta href="/recursos" label="Aprender gratis" cta="sticky_learn" intent="learn" />
+ */
+import Button from '../ui/Button.astro';
+
+interface Props {
+  href: string;
+  label: string;
+  cta: string;
+  intent: 'learn' | 'service' | 'newsletter';
+}
+const { href, label, cta, intent } = Astro.props;
+---
+
+<div class="sticky" data-sticky-cta hidden>
+  <Button href={href} variant="gold" arrow full cta={cta} placement="sticky_mobile" intent={intent}>{label}</Button>
+</div>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-sticky-cta]');
+  const hero = document.querySelector('[data-hero-top]');
+  if (bar && hero && 'IntersectionObserver' in window) {
+    let heroVisible = true;
+    const zones = new Set<Element>();
+    const update = () => {
+      const show = !heroVisible && zones.size === 0;
+      bar.hidden = false;
+      bar.toggleAttribute('data-show', show);
+      bar.inert = !show;
+    };
+    new IntersectionObserver(([e]) => {
+      heroVisible = !!e?.isIntersecting;
+      update();
+    }).observe(hero);
+    const zoneIo = new IntersectionObserver((entries) => {
+      entries.forEach((e) => (e.isIntersecting ? zones.add(e.target) : zones.delete(e.target)));
+      update();
+    });
+    document.querySelectorAll('[data-gold-zone]').forEach((z) => zoneIo.observe(z));
+  }
+</script>
+
+<style>
+  .sticky {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: var(--z-sticky);
+    padding: 12px var(--gutter) max(12px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--c-line);
+    background: var(--c-surface-2);
+    transform: translateY(110%);
+    transition: transform var(--t-med) var(--ease);
+  }
+
+  .sticky[data-show] { transform: none; }
+
+  @media (width >= 48rem) {
+    .sticky { display: none; }
+  }
+</style>

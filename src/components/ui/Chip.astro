@@ -1,0 +1,29 @@
+---
+/**
+ * Chip · etiqueta. Nunca en oro.
+ * tone="fill" sobre tarjetas · tone="line" sobre el fondo.
+ * <Chip tone="line">SEO</Chip>
+ */
+interface Props {
+  tone?: 'fill' | 'line';
+}
+const { tone = 'fill' } = Astro.props;
+---
+
+<span class:list={['chip', `chip--${tone}`]}><slot /></span>
+
+<style>
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: var(--r-full);
+    color: var(--c-text);
+    font-size: var(--fs-micro);
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+
+  .chip--fill { background: var(--c-surface-2); }
+  .chip--line { border: 1px solid var(--c-line-strong); }
+</style>

@@ -1,0 +1,105 @@
+---
+/**
+ * CompareWordPress · «Sin WordPress, sin mantenimiento». Patrón ✓/✕ de la sección Voz del manual.
+ * <CompareWordPress title="Sin WordPress. *Sin* mantenimiento." intro="…" rows={[{ yes, no }]} level="h3" />
+ */
+import { emph } from '../../lib/text';
+
+interface Props {
+  title: string;
+  intro: string;
+  rows: { yes: string; no: string }[];
+  level?: 'h2' | 'h3';
+  id?: string;
+}
+const { title, intro, rows, level = 'h3', id } = Astro.props;
+const Tag = level;
+---
+
+<div class="compare">
+  <div class="compare__head">
+    <Tag id={id} class:list={['compare__title', level === 'h2' && 'compare__title--h2']} set:html={emph(title)} />
+    <p>{intro}</p>
+  </div>
+  <div class="compare__table" role="table" aria-label="Tu web conmigo frente a una web con WordPress">
+    <div class="compare__row compare__row--head" role="row">
+      <span role="columnheader">Tu web conmigo</span>
+      <span role="columnheader">Una web con WordPress</span>
+    </div>
+    {
+      rows.map((r) => (
+        <div class="compare__row" role="row">
+          <span role="cell" class="compare__yes">
+            <span aria-hidden="true">✓</span> {r.yes}
+          </span>
+          <span role="cell" class="compare__no">
+            <span aria-hidden="true">✕</span> {r.no}
+          </span>
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .compare__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3) var(--s-6);
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: var(--s-5);
+  }
+
+  .compare__title {
+    font-size: var(--fs-lead);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.04;
+  }
+
+  .compare__title--h2 {
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 0.94;
+  }
+
+  .compare__head p { flex: 0 1 420px; }
+
+  .compare__row {
+    display: grid;
+    gap: var(--s-2) var(--s-5);
+    padding-block: var(--s-4);
+    border-bottom: 1px solid var(--c-line);
+    font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+    line-height: 1.4;
+  }
+
+  .compare__row--head {
+    padding-block: var(--s-2);
+    border-top: 1px solid var(--c-line);
+    color: var(--c-meta);
+    font-family: var(--f-mono);
+    font-size: var(--fs-mono);
+  }
+
+  @media (width >= 48rem) {
+    .compare__row { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (width < 48rem) {
+    .compare__row--head { display: none; }
+  }
+
+  .compare__yes { color: var(--c-ink); }
+  .compare__yes > span { margin-right: 12px; color: var(--c-gold); }
+
+  .compare__no {
+    color: var(--c-meta);
+    text-decoration: line-through;
+    text-decoration-color: var(--c-line-strong);
+  }
+
+  .compare__no > span { margin-right: 12px; }
+</style>

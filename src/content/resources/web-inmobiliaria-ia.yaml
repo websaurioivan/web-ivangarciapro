@@ -1,0 +1,6 @@
+title: Prompt para crear una inmobiliaria completa
+type: prompt
+summary: '[Resumen del recurso cuando exista.]'
+gated: false
+featured: true
+order: 3

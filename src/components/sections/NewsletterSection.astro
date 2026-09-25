@@ -1,0 +1,97 @@
+---
+/**
+ * NewsletterSection · «Una web mejor cada semana». Bloque protagonista y centrado con foto de Iván.
+ * Idea de captación de la captura del cliente; diseño 100 % del manual Oro.
+ */
+import Placeholder from '../ui/Placeholder.astro';
+import Chip from '../ui/Chip.astro';
+import NewsletterForm from '../ui/NewsletterForm.astro';
+import { emph } from '../../lib/text';
+
+interface Props {
+  data: { title: string; text: string; topics: string[]; button: string; microcopy: string };
+}
+const { data } = Astro.props;
+---
+
+<section class="section nls" id="newsletter" aria-labelledby="nls-title" data-gold-zone>
+  <div class="nls__glow" aria-hidden="true"></div>
+  <div class="container nls__inner">
+    <Placeholder label="Foto de Iván" ratio="1/1" round class="nls__photo" />
+    <h2 id="nls-title" class="nls__title" set:html={emph(data.title, 'nls__em')} />
+    <p class="nls__text">{data.text}</p>
+    <ul role="list" class="nls__topics" aria-label="Qué recibirás">
+      {
+        data.topics.map((t) => (
+          <li>
+            <Chip tone="line">{t}</Chip>
+          </li>
+        ))
+      }
+    </ul>
+    <NewsletterForm id="nl-home" placement="home_newsletter" button={data.button} microcopy={data.microcopy} />
+  </div>
+</section>
+
+<style>
+  .nls { overflow: hidden; }
+
+  .nls__glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(1100px, 140vw);
+    height: 720px;
+    border-radius: 50%;
+    background: var(--g-glow);
+    opacity: 0.2;
+    transform: translate(-50%, -30%);
+    pointer-events: none;
+  }
+
+  .nls__inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .nls :global(.nls__photo) {
+    width: 112px;
+    margin-bottom: var(--s-5);
+  }
+
+  .nls :global(.nls__photo .ph__label) { font-size: 0.625rem; }
+
+  .nls__title {
+    max-width: 14ch;
+    font-size: var(--fs-display);
+    line-height: 0.88;
+    letter-spacing: -0.045em;
+  }
+
+  .nls__title :global(.nls__em) {
+    background: var(--g-gold-text);
+    background-size: 220% 100%;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .nls__text {
+    max-width: 36rem;
+    margin-top: var(--s-5);
+    font-size: var(--fs-body-lg);
+  }
+
+  .nls__topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    justify-content: center;
+    margin-block: var(--s-5);
+  }
+
+  .nls__inner :global(.nl__micro),
+  .nls__inner :global(.nl__msg) { text-align: center; }
+</style>

@@ -1,0 +1,49 @@
+---
+/**
+ * Placeholder · hueco visible para material real pendiente (foto, captura…).
+ * Nunca stock. Se sustituye por <Image> cuando exista el material.
+ * <Placeholder label="Foto de Iván · luz cálida lateral" ratio="4/5" />
+ */
+interface Props {
+  label: string;
+  ratio?: string;
+  round?: boolean;
+  class?: string;
+}
+const { label, ratio = '4/3', round = false, class: className } = Astro.props;
+---
+
+<div
+  class:list={['ph', round && 'ph--round', className]}
+  style={`aspect-ratio:${ratio}`}
+  role="img"
+  aria-label={`Pendiente: ${label}`}
+>
+  <span class="ph__label">[{label}]</span>
+</div>
+
+<style>
+  .ph {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    overflow: hidden;
+    border: 1px dashed var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background:
+      radial-gradient(120% 90% at 100% 0%, var(--c-gold-06), transparent 60%),
+      var(--c-surface);
+  }
+
+  .ph--round { border-radius: 50%; }
+
+  .ph__label {
+    max-width: 80%;
+    padding: var(--s-3);
+    color: var(--c-meta);
+    font-family: var(--f-mono);
+    font-size: var(--fs-mono);
+    text-align: center;
+  }
+</style>

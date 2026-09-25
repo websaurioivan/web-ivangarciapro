@@ -1,0 +1,143 @@
+---
+/**
+ * ServicePlans · servicios con sus 3 modalidades en tarjetas apiladas. Datos: colección `services`.
+ * <ServicePlans detailed note="Precios orientativos…" />
+ * `detailed`: muestra también el plazo y los incluidos completos (página /diseno-web).
+ */
+import { getCollection } from 'astro:content';
+import { pad2 } from '../../lib/text';
+
+interface Props {
+  detailed?: boolean;
+  delivery?: string;
+  note?: string;
+}
+const { detailed = false, delivery = '', note = '' } = Astro.props;
+const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+const anyProvisional = services.some((s) => s.data.plans.some((p) => p.provisional));
+---
+
+<div class="stack" data-stack style="--stack-step:16px">
+  {
+    services.map((s, i) => {
+      const unico = s.data.plans.find((p) => p.mode === 'unico');
+      const frac = s.data.plans.find((p) => p.mode === 'fraccionado');
+      const renting = s.data.plans.find((p) => p.mode === 'renting');
+      return (
+        <article class="stack__card plan" style={`--i:${i}`} aria-labelledby={`plan-${s.id}`}>
+          <div class="plan__main">
+            <p class="stack__count">
+              <b>{pad2(i + 1)}</b> / {pad2(services.length)} · Servicio
+            </p>
+            <h3 class="plan__name" id={`plan-${s.id}`}>
+              {s.data.name}
+            </h3>
+            <p class="plan__for">{s.data.forWho}</p>
+            <ul role="list" class="plan__includes">
+              {s.data.includes.map((inc) => (
+                <li>
+                  <span aria-hidden="true">✓</span> {inc}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <dl class="plan__prices">
+            {detailed && delivery && (
+              <div>
+                <dt>Entrega</dt>
+                <dd>{delivery}</dd>
+              </div>
+            )}
+            {unico && (
+              <div>
+                <dt>Pago único</dt>
+                <dd>{unico.price}</dd>
+              </div>
+            )}
+            {frac && (
+              <div>
+                <dt>Fraccionado · sin intereses</dt>
+                <dd>{frac.monthly}</dd>
+              </div>
+            )}
+            {renting && (
+              <div>
+                <dt>Renting · {renting.months ?? 24} meses</dt>
+                <dd>
+                  {renting.upfront} + {renting.monthly}
+                </dd>
+              </div>
+            )}
+          </dl>
+        </article>
+      );
+    })
+  }
+</div>
+{anyProvisional && note && <p class="plans__note">{note}</p>}
+
+<style>
+  .plan {
+    display: grid;
+    gap: var(--s-5);
+    padding: var(--s-5) var(--s-4);
+  }
+
+  @media (width >= 56rem) {
+    .plan {
+      grid-template-columns: 7fr 5fr;
+      gap: var(--s-7);
+      align-items: end;
+      padding: var(--s-6);
+    }
+  }
+
+  .plan__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+  }
+
+  .plan__name {
+    margin-top: var(--s-4);
+    font-size: clamp(2rem, 4.4vw, 3.75rem);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+  }
+
+  .plan__for { max-width: 30rem; }
+
+  .plan__includes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-4);
+    margin-top: var(--s-2);
+    font-size: var(--fs-small);
+  }
+
+  .plan__includes span { color: var(--c-gold); }
+
+  .plan__prices { border-top: 1px solid var(--c-line); }
+
+  .plan__prices > div {
+    display: flex;
+    gap: var(--s-3);
+    align-items: baseline;
+    justify-content: space-between;
+    padding-block: var(--s-3);
+    border-bottom: 1px solid var(--c-line);
+  }
+
+  .plan__prices dt { color: var(--c-meta); font-family: var(--f-mono); font-size: var(--fs-mono); }
+
+  .plan__prices dd {
+    margin: 0;
+    color: var(--c-ink);
+    font-family: var(--f-mono);
+    font-size: var(--fs-small);
+    text-align: right;
+  }
+
+  .plans__note { margin-top: var(--s-3); color: var(--c-meta); font-size: var(--fs-micro); }
+</style>

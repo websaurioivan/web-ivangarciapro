@@ -1,0 +1,60 @@
+---
+/**
+ * BrowserFrame · marco de navegador del manual (3 puntos + URL en mono).
+ * <BrowserFrame url="cliente.es"><Placeholder … /></BrowserFrame>
+ */
+interface Props {
+  url: string;
+  class?: string;
+}
+const { url, class: className } = Astro.props;
+---
+
+<div class:list={['frame', className]}>
+  <div class="frame__bar" aria-hidden="true">
+    <span></span><span></span><span></span>
+    <span class="frame__url">{url}</span>
+  </div>
+  <div class="frame__body"><slot /></div>
+</div>
+
+<style>
+  .frame {
+    overflow: hidden;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: var(--c-bg);
+    box-shadow: var(--shadow-frame);
+  }
+
+  .frame__bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--c-line);
+    background: var(--c-surface);
+  }
+
+  .frame__bar > span:not(.frame__url) {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--c-frame-dot);
+  }
+
+  .frame__url {
+    margin-left: 10px;
+    padding: 4px 14px;
+    overflow: hidden;
+    border-radius: var(--r-full);
+    background: var(--c-bg);
+    color: var(--c-meta);
+    font-family: var(--f-mono);
+    font-size: var(--fs-mono);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .frame__body { position: relative; }
+</style>

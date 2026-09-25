@@ -1,0 +1,189 @@
+---
+/**
+ * ServiceHero · hero sobrio de /diseno-web. A la derecha, la línea de tiempo del prototipo
+ * (punto de oro = «hoy», el piloto encendido del logo). Sin momento wow: esta página convierte.
+ */
+import Button from '../ui/Button.astro';
+import QuotaEyebrow from './QuotaEyebrow.astro';
+import { emph } from '../../lib/text';
+
+interface Props {
+  data: {
+    title: string;
+    subtitle: string;
+    primary: { label: string; href: string };
+    secondary: { label: string; href: string };
+    timeline: { when: string; what: string }[];
+    timelineNote: string;
+  };
+  perWeek: number;
+  crumbs: { label: string; href?: string }[];
+}
+const { data, perWeek, crumbs } = Astro.props;
+---
+
+<section class="shero" aria-labelledby="shero-title">
+  <div class="shero__glow" aria-hidden="true"></div>
+  <div class="container shero__grid">
+    <div class="shero__copy">
+      <nav class="crumbs mono" aria-label="Migas de pan">
+        {
+          crumbs.map((c, i) => (
+            <>
+              {c.href ? <a href={c.href}>{c.label}</a> : <span aria-current="page">{c.label}</span>}
+              {i < crumbs.length - 1 && <span aria-hidden="true"> / </span>}
+            </>
+          ))
+        }
+      </nav>
+      <QuotaEyebrow perWeek={perWeek} />
+      <h1 id="shero-title" class="shero__title" set:html={emph(data.title)} />
+      <p class="shero__sub">{data.subtitle}</p>
+      <div class="shero__ctas" data-hero-top>
+        <Button href={data.primary.href} variant="gold" arrow cta="service_hero_prototype" placement="service_hero" intent="service">
+          {data.primary.label}
+        </Button>
+        <Button href={data.secondary.href} variant="ghost" cta="service_hero_works" placement="service_hero" intent="service">
+          {data.secondary.label}
+        </Button>
+      </div>
+    </div>
+
+    <aside class="ticket" aria-label="Qué pasa cuando pides tu prototipo">
+      <p class="ticket__head mono">Tu prototipo</p>
+      <ol role="list" class="ticket__list">
+        {
+          data.timeline.map((t, i) => (
+            <li class:list={['ticket__item', i === 0 && 'is-now']}>
+              <span class="ticket__dot" aria-hidden="true" />
+              <span class="ticket__when mono">{t.when}</span>
+              <span class="ticket__what">{t.what}</span>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="ticket__note">{data.timelineNote}</p>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .shero {
+    position: relative;
+    overflow: clip;
+    padding-block: clamp(48px, 8vh, 96px) var(--section-y);
+  }
+
+  .shero__glow {
+    position: absolute;
+    top: -360px;
+    right: -320px;
+    width: 820px;
+    height: 820px;
+    border-radius: 50%;
+    background: var(--g-glow);
+    opacity: var(--glow-opacity);
+    pointer-events: none;
+  }
+
+  .shero__grid {
+    position: relative;
+    display: grid;
+    gap: var(--s-7);
+    align-items: center;
+  }
+
+  @media (width >= 64rem) {
+    .shero__grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: clamp(48px, 6vw, 112px); }
+  }
+
+  .shero__copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+    align-items: flex-start;
+  }
+
+  .crumbs { color: var(--c-meta); }
+  .crumbs a { color: var(--c-meta); }
+  .crumbs a:hover { color: var(--c-ink); }
+  .crumbs [aria-current] { color: var(--c-ink); }
+
+  .shero__title {
+    font-size: clamp(3rem, 6.8vw, 7rem);
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+  }
+
+  .shero__title :global(.serif-em) {
+    background: var(--g-gold-text);
+    background-size: 220% 100%;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .shero__sub { max-width: 34rem; font-size: var(--fs-body-lg); line-height: 1.55; }
+
+  .shero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: var(--s-2);
+  }
+
+  @media (width < 30rem) {
+    .shero__ctas :global(.btn) { flex: 1 1 100%; }
+  }
+
+  /* Línea de tiempo */
+  .ticket {
+    padding: var(--s-5);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: var(--c-surface);
+  }
+
+  .ticket__head { color: var(--c-meta); }
+  .ticket__list { position: relative; margin-top: var(--s-4); }
+
+  .ticket__list::before {
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    left: 5px;
+    width: 1px;
+    background: var(--c-line-strong);
+    content: "";
+  }
+
+  .ticket__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 11px 88px 1fr;
+    gap: var(--s-3);
+    align-items: baseline;
+    padding-block: var(--s-3);
+  }
+
+  .ticket__dot {
+    position: relative;
+    top: 1px;
+    width: 11px;
+    height: 11px;
+    border: 1px solid var(--c-gold-45);
+    border-radius: 50%;
+    background: var(--c-surface);
+  }
+
+  .is-now .ticket__dot { border-color: var(--c-gold); background: var(--c-gold); box-shadow: var(--shadow-dot); }
+  .ticket__when { color: var(--c-gold); }
+  .ticket__what { color: var(--c-ink); font-size: var(--fs-small); }
+
+  .ticket__note {
+    margin-top: var(--s-3);
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--c-line);
+    color: var(--c-meta);
+    font-size: var(--fs-micro);
+  }
+</style>

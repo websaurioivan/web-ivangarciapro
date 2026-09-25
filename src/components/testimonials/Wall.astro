@@ -1,0 +1,120 @@
+---
+/**
+ * Testimonios · MURO EN MOVIMIENTO. Dos filas de frases cortas que se deslizan muy despacio en sentidos opuestos.
+ * Sin oro (no compite con la cinta). Pausa con hover y botón (WCAG 2.2.2); quieto con prefers-reduced-motion.
+ * Necesita 8+ testimonios con el campo `short` para lucir.
+ * <Wall id="tst-wall" title="Lo que dicen *de mí*" items={await getTestimonials()} />
+ */
+import { emph } from '../../lib/text';
+import type { Testimonial } from '../../lib/testimonials';
+
+interface Props {
+  id: string;
+  title: string;
+  items: Testimonial[];
+}
+const { id, title, items } = Astro.props;
+const half = Math.ceil(items.length / 2);
+const rows = [items.slice(0, half), items.slice(half).length ? items.slice(half) : items];
+---
+
+<section class="section ts-wall" aria-labelledby={`${id}-title`}>
+  <div class="container">
+    <h2 id={`${id}-title`} class="ts-wall__title" set:html={emph(title)} />
+  </div>
+  <ul class="visually-hidden">
+    {items.map((t) => <li>{t.short} — {t.name}</li>)}
+  </ul>
+  <div class="wall" data-wall aria-hidden="true">
+    {
+      rows.map((row, r) => (
+        <div class:list={['wall__row', r === 1 && 'wall__row--rev']}>
+          <div class="wall__track">
+            {[0, 1, 2, 3].map(() =>
+              row.map((t) => (
+                <figure class="wall__card">
+                  <blockquote>{t.short}</blockquote>
+                  <figcaption class="mono">{t.name}</figcaption>
+                </figure>
+              )),
+            )}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+  <div class="container wall__ctrl">
+    <button type="button" class="wall__pause" data-wall-toggle aria-pressed="false">Pausar</button>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-wall-toggle]').forEach((btn) => {
+    const wall = btn.closest('section')?.querySelector<HTMLElement>('[data-wall]');
+    btn.addEventListener('click', () => {
+      const p = btn.getAttribute('aria-pressed') !== 'true';
+      btn.setAttribute('aria-pressed', String(p));
+      btn.textContent = p ? 'Reanudar' : 'Pausar';
+      wall?.toggleAttribute('data-paused', p);
+    });
+  });
+</script>
+
+<style>
+  .ts-wall__title { margin-bottom: var(--s-6); }
+
+  .wall {
+    position: relative;
+    display: grid;
+    gap: var(--s-3);
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  }
+
+  .wall__track {
+    display: flex;
+    gap: var(--s-3);
+    width: max-content;
+    animation: wall-slide 80s linear infinite;
+  }
+
+  .wall__row--rev .wall__track { animation-direction: reverse; animation-duration: 95s; }
+
+  .wall[data-paused] .wall__track,
+  .wall:hover .wall__track { animation-play-state: paused; }
+
+  .wall__card {
+    width: 320px;
+    margin: 0;
+    padding: var(--s-4);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-md);
+    background: var(--c-surface);
+  }
+
+  .wall__card blockquote { margin: 0; color: var(--c-ink); font-size: var(--fs-small); }
+  .wall__card figcaption { margin-top: var(--s-2); color: var(--c-meta); }
+
+  .wall__ctrl { display: flex; justify-content: flex-end; margin-top: var(--s-3); }
+
+  .wall__pause {
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-full);
+    background: transparent;
+    color: var(--c-meta);
+    font-size: var(--fs-micro);
+  }
+
+  .wall__pause:hover { border-color: var(--c-gold-60); color: var(--c-ink); }
+
+  @keyframes wall-slide {
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wall__track { animation: none; }
+    .wall__ctrl { display: none; }
+  }
+</style>

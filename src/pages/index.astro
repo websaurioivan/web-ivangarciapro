@@ -1,0 +1,38 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/sections/Hero.astro';
+import GoldRibbon from '../components/ui/GoldRibbon.astro';
+import Works from '../components/sections/Works.astro';
+import LearnFree from '../components/sections/LearnFree.astro';
+import ServiceTeaser from '../components/sections/ServiceTeaser.astro';
+import About from '../components/sections/About.astro';
+import NewsletterSection from '../components/sections/NewsletterSection.astro';
+// Diseño de testimonios activo. Alternativas en src/components/testimonials/ (catálogo en /lab/testimonios).
+import Testimonials from '../components/testimonials/Carousel.astro';
+import { getSettings } from '../lib/site';
+import { getTestimonials } from '../lib/testimonials';
+import { graph, personSchema, websiteSchema } from '../lib/seo';
+
+const home = (await getEntry('home', 'home'))?.data;
+if (!home) throw new Error('Falta src/content/pages/home.json');
+const settings = await getSettings();
+const testimonials = await getTestimonials({ featuredOnly: true });
+---
+
+<BaseLayout
+  title={home.seo.title}
+  description={home.seo.description}
+  pageType="home"
+  jsonLd={graph(personSchema(settings), websiteSchema(settings))}
+  sticky={{ href: home.hero.primary.href, label: home.hero.primary.label, cta: 'sticky_learn', intent: 'learn' }}
+>
+  <Hero data={home.hero} />
+  <GoldRibbon words={home.ribbon} />
+  <Works data={home.works} />
+  <LearnFree data={home.learn} hostingerUrl={settings.hostingerUrl} />
+  <ServiceTeaser data={home.service} perWeek={settings.prototypesPerWeek} />
+  <Testimonials id="testimonios" title={home.testimonials.title} items={testimonials} reviews={settings.reviews} />
+  <About data={home.about} youtubeUrl={settings.youtubeUrl} />
+  <NewsletterSection data={home.newsletter} />
+</BaseLayout>

@@ -1,0 +1,70 @@
+---
+/**
+ * Testimonios · MENSAJES REALES. Capturas de WhatsApp / email de clientes (con su permiso) en tarjetas apiladas.
+ * Usa el sistema .stack (global.css + lib/stack.ts). La prueba más creíble: no está «redactada».
+ * Mientras no haya capturas, muestra un placeholder visible.
+ * <MessageStack id="tst-msg" title="Mensajes que *me llegan*" items={await getTestimonials()} limit={3} />
+ */
+import Placeholder from '../ui/Placeholder.astro';
+import { emph } from '../../lib/text';
+import { pad2, type Testimonial } from '../../lib/testimonials';
+
+interface Props {
+  id: string;
+  title: string;
+  items: Testimonial[];
+  limit?: number;
+}
+const { id, title, items, limit = 3 } = Astro.props;
+const list = items.slice(0, limit);
+---
+
+<section class="section ts-msg" aria-labelledby={`${id}-title`}>
+  <div class="container">
+    <h2 id={`${id}-title`} class="ts-msg__title" set:html={emph(title)} />
+    <div class="stack" data-stack style="--stack-step:28px">
+      {
+        list.map((t, i) => (
+          <figure class="stack__card msg" style={`--i:${i}`}>
+            <div class="msg__text">
+              <p class="stack__count">
+                <b>{pad2(i + 1)}</b> / {pad2(list.length)} · {t.role}
+              </p>
+              <blockquote class="msg__quote">{t.quote}</blockquote>
+              <figcaption class="mono">{t.name}</figcaption>
+            </div>
+            <Placeholder label="Captura real del mensaje (WhatsApp / email) con permiso del cliente" ratio="4/3" />
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .ts-msg__title { margin-bottom: var(--s-6); }
+
+  .msg {
+    display: grid;
+    gap: var(--s-5);
+    padding: var(--s-4);
+  }
+
+  @media (width >= 56rem) {
+    .msg { grid-template-columns: 6fr 5fr; gap: var(--s-6); align-items: center; padding: var(--s-6); }
+  }
+
+  .msg__text { display: flex; flex-direction: column; gap: var(--s-4); }
+
+  .msg__quote {
+    margin: 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: clamp(1.5rem, 2.8vw, 2.25rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .msg figcaption { color: var(--c-meta); }
+</style>

@@ -1,0 +1,158 @@
+---
+/**
+ * Testimonios · CONSTELACIÓN. Avatares flotando alrededor; al pasar o pulsar uno, su testimonio ocupa el centro.
+ * Ideal con fotos reales de clientes. Máx. 6 avatares. Flotación desactivada con prefers-reduced-motion.
+ * <Constellation id="tst-constel" title="Lo que dicen *mis clientes*" items={await getTestimonials()} />
+ */
+import { emph } from '../../lib/text';
+import type { Testimonial } from '../../lib/testimonials';
+
+interface Props {
+  id: string;
+  title: string;
+  items: Testimonial[];
+}
+const { id, title, items } = Astro.props;
+const orbit = [
+  { x: 12, y: 16, s: 88 },
+  { x: 44, y: 6, s: 64 },
+  { x: 84, y: 14, s: 92 },
+  { x: 8, y: 78, s: 76 },
+  { x: 40, y: 88, s: 60 },
+  { x: 86, y: 80, s: 84 },
+];
+const list = items.slice(0, orbit.length);
+---
+
+<section class="section ts-constel" aria-labelledby={`${id}-title`}>
+  <div class="container">
+    <h2 id={`${id}-title`} class="ts-constel__title" set:html={emph(title)} />
+    <div class="constel" data-constel>
+      <div class="constel__glow" aria-hidden="true"></div>
+      {
+        list.map((t, i) => (
+          <button
+            type="button"
+            class="constel__avatar"
+            style={`--x:${orbit[i]!.x}%;--y:${orbit[i]!.y}%;--s:${orbit[i]!.s}px;--d:${i * 0.7}s`}
+            data-constel-btn={i}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+            aria-label={`Ver testimonio de ${t.name}`}
+          >
+            <span class="constel__face">{t.initial}</span>
+          </button>
+        ))
+      }
+      <div class="constel__center" aria-live="polite">
+        {
+          list.map((t, i) => (
+            <figure class="constel__quote" data-constel-panel={i} hidden={i !== 0}>
+              <blockquote>{t.quote}</blockquote>
+              <figcaption class="mono">
+                {t.name} · {t.role}
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-constel]').forEach((root) => {
+    const btns = [...root.querySelectorAll<HTMLButtonElement>('[data-constel-btn]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-constel-panel]')];
+    const show = (i: number) => {
+      btns.forEach((b, j) => b.setAttribute('aria-pressed', String(i === j)));
+      panels.forEach((p, j) => (p.hidden = i !== j));
+    };
+    btns.forEach((b, i) => {
+      b.addEventListener('click', () => show(i));
+      b.addEventListener('pointerenter', (e) => e.pointerType === 'mouse' && show(i));
+    });
+  });
+</script>
+
+<style>
+  .ts-constel__title { margin-bottom: var(--s-5); }
+
+  .constel {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: clamp(520px, 60vw, 640px);
+  }
+
+  .constel__glow {
+    position: absolute;
+    inset: 15% 20%;
+    border-radius: 50%;
+    background: var(--g-glow);
+    opacity: 0.16;
+    pointer-events: none;
+  }
+
+  .constel__avatar {
+    position: absolute;
+    top: var(--y);
+    left: var(--x);
+    width: var(--s);
+    height: var(--s);
+    padding: 0;
+    border: 1px solid var(--c-line-strong);
+    border-radius: 50%;
+    background: var(--c-surface);
+    translate: -50% -50%;
+    transition: border-color var(--t-med) ease, box-shadow var(--t-med) ease;
+    animation: constel-float 9s var(--ease) var(--d) infinite alternate;
+  }
+
+  .constel__face {
+    color: var(--c-meta);
+    font-family: var(--f-serif);
+    font-size: calc(var(--s) * 0.4);
+    font-style: italic;
+  }
+
+  .constel__avatar[aria-pressed="true"] {
+    border-color: var(--c-gold);
+    box-shadow: 0 0 0 4px var(--c-bg), 0 0 0 5px var(--c-gold-45), 0 0 40px var(--c-gold-28);
+  }
+
+  .constel__avatar[aria-pressed="true"] .constel__face { color: var(--c-gold); }
+
+  @keyframes constel-float {
+    to { transform: translateY(-14px); }
+  }
+
+  .constel__center {
+    position: relative;
+    max-width: 38rem;
+    text-align: center;
+  }
+
+  .constel__quote { margin: 0; }
+
+  .constel__quote blockquote {
+    margin: 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .constel__quote figcaption { margin-top: var(--s-4); color: var(--c-meta); }
+
+  @media (width < 48rem) {
+    .constel { display: flex; flex-wrap: wrap; justify-content: center; min-height: 0; padding-block: var(--s-4); }
+    .constel__avatar { position: static; display: inline-grid; translate: none; margin: 4px; animation: none; }
+    .constel__center { order: -1; flex-basis: 100%; margin-bottom: var(--s-5); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .constel__avatar { animation: none; }
+  }
+</style>

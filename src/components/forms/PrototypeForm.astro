@@ -1,0 +1,485 @@
+---
+/**
+ * PrototypeForm · solicitud de prototipo gratis → POST /api/prototipo.php (MailerLite + email a Iván + cupo semanal).
+ * - Validación accesible: mensajes que dicen cómo corregir, aria-invalid, foco al primer error.
+ * - Cupo real: si /api/cupos.php devuelve 0 (evento `quota`), pasa a modo lista de espera. El servidor decide igualmente.
+ * - Funciona sin JS (POST normal). Evento `prototype_request` al completar.
+ */
+import { emph } from '../../lib/text';
+
+interface Props {
+  data: {
+    title: string;
+    intro: string;
+    button: string;
+    microcopy: string;
+    success: string;
+    waitlistTitle: string;
+    waitlistText: string;
+    waitlistButton: string;
+    waitlistSuccess: string;
+  };
+  types: { value: string; label: string }[];
+}
+const { data, types } = Astro.props;
+---
+
+<section class="section proto" id="prototipo" aria-labelledby="proto-title" data-gold-zone>
+  <div class="proto__glow" aria-hidden="true"></div>
+  <div class="container proto__grid">
+    <div class="proto__copy">
+      <h2 id="proto-title" data-t-normal set:html={emph(data.title)} />
+      <h2 class="proto__wl-title" data-t-waitlist hidden>{data.waitlistTitle}</h2>
+      <p data-t-normal>{data.intro}</p>
+      <p data-t-waitlist hidden>{data.waitlistText}</p>
+    </div>
+
+    <form
+      class="pf"
+      action="/api/prototipo.php"
+      method="post"
+      novalidate
+      data-proto
+      data-success={data.success}
+      data-waitlist-success={data.waitlistSuccess}
+      data-button={data.button}
+      data-waitlist-button={data.waitlistButton}
+    >
+      <div class="pf__grid">
+        <div class="pf__field">
+          <label for="pf-name">Nombre</label>
+          <input id="pf-name" name="name" type="text" autocomplete="name" required maxlength="100" aria-describedby="pf-name-err" />
+          <p class="pf__err" id="pf-name-err"></p>
+        </div>
+        <div class="pf__field">
+          <label for="pf-email">Email</label>
+          <input id="pf-email" name="email" type="email" inputmode="email" autocomplete="email" required maxlength="254" aria-describedby="pf-email-err" />
+          <p class="pf__err" id="pf-email-err"></p>
+        </div>
+        <div class="pf__field">
+          <label for="pf-phone">Teléfono / WhatsApp</label>
+          <input id="pf-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required maxlength="25" placeholder="+34 600 000 000" aria-describedby="pf-phone-hint pf-phone-err" />
+          <p class="pf__hint" id="pf-phone-hint">Con prefijo si no estás en España.</p>
+          <p class="pf__err" id="pf-phone-err"></p>
+        </div>
+        <div class="pf__field">
+          <label for="pf-business">Tu negocio o sector</label>
+          <input id="pf-business" name="business" type="text" autocomplete="organization" required maxlength="120" placeholder="Ej.: clínica dental en Valencia" aria-describedby="pf-business-err" />
+          <p class="pf__err" id="pf-business-err"></p>
+        </div>
+        <div class="pf__field pf__field--full">
+          <label for="pf-web">Tu web actual <span class="pf__opt">(opcional)</span></label>
+          <input id="pf-web" name="website_url" type="text" inputmode="url" autocomplete="url" maxlength="200" placeholder="tuweb.com" aria-describedby="pf-web-err" />
+          <p class="pf__err" id="pf-web-err"></p>
+        </div>
+
+        <fieldset class="pf__field pf__field--full pf__radios" aria-describedby="pf-type-err">
+          <legend>¿Qué necesitas?</legend>
+          <div class="pf__options">
+            {
+              types.map((t, i) => (
+                <label class="pf__option">
+                  <input type="radio" name="type" value={t.value} required={i === 0} />
+                  <span>{t.label}</span>
+                </label>
+              ))
+            }
+          </div>
+          <p class="pf__err" id="pf-type-err"></p>
+        </fieldset>
+
+        <div class="pf__field pf__field--full">
+          <label for="pf-goal">¿Qué quieres conseguir con tu web?</label>
+          <textarea id="pf-goal" name="goal" rows="3" required maxlength="600" placeholder="Ej.: que me pidan más citas desde Google" aria-describedby="pf-goal-err"></textarea>
+          <p class="pf__err" id="pf-goal-err"></p>
+        </div>
+
+        <div class="pf__field pf__field--full">
+          <label class="pf__check">
+            <input type="checkbox" name="privacy" value="1" required aria-describedby="pf-privacy-err" />
+            <span>He leído y acepto la <a href="/privacidad" target="_blank">política de privacidad</a>.</span>
+          </label>
+          <p class="pf__err" id="pf-privacy-err"></p>
+        </div>
+      </div>
+
+      <div class="pf__trap" aria-hidden="true">
+        <label for="pf-website">No rellenes este campo</label>
+        <input id="pf-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+      <input type="hidden" name="ts" value="" data-ts />
+      <input type="hidden" name="mode" value="prototipo" data-mode />
+
+      <button class="pf__submit" type="submit">{data.button}</button>
+      <p class="pf__micro">{data.microcopy}</p>
+      <p class="pf__status" role="status" aria-live="polite" tabindex="-1"></p>
+    </form>
+  </div>
+</section>
+
+<script>
+  import { track } from '../../lib/analytics';
+
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const form = document.querySelector<HTMLFormElement>('[data-proto]');
+
+  if (form) {
+    const btn = form.querySelector<HTMLButtonElement>('.pf__submit')!;
+    const status = form.querySelector<HTMLElement>('.pf__status')!;
+    const modeInput = form.querySelector<HTMLInputElement>('[data-mode]')!;
+    const ts = form.querySelector<HTMLInputElement>('[data-ts]');
+    if (ts) ts.value = String(Date.now());
+    const section = form.closest('section')!;
+    const val = (n: string) => (form.elements.namedItem(n) as HTMLInputElement | null)?.value.trim() ?? '';
+
+    const setWaitlist = (on: boolean) => {
+      modeInput.value = on ? 'espera' : 'prototipo';
+      section.querySelectorAll<HTMLElement>('[data-t-normal]').forEach((e) => (e.hidden = on));
+      section.querySelectorAll<HTMLElement>('[data-t-waitlist]').forEach((e) => (e.hidden = !on));
+      btn.textContent = on ? form.dataset.waitlistButton! : form.dataset.button!;
+    };
+    document.addEventListener('quota', (e) => setWaitlist((e as CustomEvent<number>).detail <= 0));
+    if (document.documentElement.dataset.quota === '0') setWaitlist(true);
+
+    const rules: Record<string, () => string> = {
+      name: () => (val('name').length < 2 ? 'Escribe tu nombre.' : ''),
+      email: () =>
+        !val('email') ? 'Escribe tu email.' : EMAIL.test(val('email')) ? '' : 'Revisa el email: debe tener @ y un dominio, como nombre@dominio.com.',
+      phone: () => {
+        const digits = val('phone').replace(/\D/g, '');
+        if (!digits) return 'Escribe tu teléfono o WhatsApp para poder enviarte el prototipo.';
+        return digits.length < 9 || digits.length > 15 ? 'El teléfono debe tener entre 9 y 15 cifras. Si no estás en España, añade el prefijo (+52, +57…).' : '';
+      },
+      business: () => (val('business').length < 2 ? 'Cuéntame en pocas palabras a qué se dedica tu negocio.' : ''),
+      website_url: () => {
+        const v = val('website_url');
+        return v && !/^(https?:\/\/)?[^\s.]+\.[^\s]{2,}$/i.test(v) ? 'Esa dirección no parece una web. Escribe algo como tuweb.com o déjalo vacío.' : '';
+      },
+      type: () => (form.querySelector('input[name="type"]:checked') ? '' : 'Elige qué tipo de web necesitas.'),
+      goal: () => (val('goal').length < 5 ? 'Escribe en una frase qué quieres conseguir.' : ''),
+      privacy: () =>
+        (form.elements.namedItem('privacy') as HTMLInputElement).checked ? '' : 'Necesito que aceptes la política de privacidad para preparar tu prototipo.',
+    };
+    const errId: Record<string, string> = {
+      name: 'pf-name-err', email: 'pf-email-err', phone: 'pf-phone-err', business: 'pf-business-err',
+      website_url: 'pf-web-err', type: 'pf-type-err', goal: 'pf-goal-err', privacy: 'pf-privacy-err',
+    };
+    const fieldEl = (n: string) =>
+      n === 'type' ? form.querySelector<HTMLElement>('.pf__radios') : (form.elements.namedItem(n) as HTMLElement | null);
+
+    const check = (n: string) => {
+      const msg = rules[n]!();
+      const el = fieldEl(n);
+      const err = document.getElementById(errId[n]!);
+      if (err) err.textContent = msg;
+      el?.setAttribute('aria-invalid', String(!!msg));
+      el?.closest('.pf__field')?.toggleAttribute('data-error', !!msg);
+      return !msg;
+    };
+
+    Object.keys(rules).forEach((n) => {
+      const el = n === 'type' ? form.querySelectorAll('input[name="type"]') : [fieldEl(n)];
+      el.forEach((x) => {
+        x?.addEventListener('blur', () => { if (x.closest('.pf__field')?.hasAttribute('data-error') || (x as HTMLInputElement).value) check(n); });
+        x?.addEventListener('change', () => { if (x.closest('.pf__field')?.hasAttribute('data-error')) check(n); });
+      });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const invalid = Object.keys(rules).filter((n) => !check(n));
+      if (invalid.length) {
+        status.textContent = invalid.length === 1 ? 'Revisa el campo marcado.' : `Revisa los ${invalid.length} campos marcados.`;
+        form.dataset.state = 'error';
+        const first = invalid[0]!;
+        (first === 'type' ? form.querySelector<HTMLInputElement>('input[name="type"]') : (fieldEl(first) as HTMLElement))?.focus();
+        return;
+      }
+      form.dataset.state = 'loading';
+      status.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'Enviando…';
+      try {
+        const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+        const d = (await res.json().catch(() => ({}))) as { ok?: boolean; waitlist?: boolean; message?: string };
+        if (!res.ok || !d.ok) throw new Error(d.message || 'error');
+        form.dataset.state = 'ok';
+        form.querySelector('.pf__grid')?.setAttribute('hidden', '');
+        btn.hidden = true;
+        status.textContent = d.waitlist ? form.dataset.waitlistSuccess! : form.dataset.success!;
+        status.focus();
+        track('prototype_request', {
+          service_type: (form.querySelector('input[name="type"]:checked') as HTMLInputElement | null)?.value,
+          placement: d.waitlist ? 'waitlist' : 'service_form',
+        });
+      } catch (err) {
+        form.dataset.state = 'error';
+        btn.disabled = false;
+        btn.textContent = modeInput.value === 'espera' ? form.dataset.waitlistButton! : form.dataset.button!;
+        status.textContent =
+          err instanceof Error && err.message !== 'error' && err.message !== 'Failed to fetch'
+            ? err.message
+            : 'No se ha podido enviar. Inténtalo de nuevo en unos minutos o escríbeme a info@ivangarcia.pro.';
+      }
+    });
+  }
+</script>
+
+<style>
+  .proto { overflow: hidden; }
+
+  .proto__glow {
+    position: absolute;
+    bottom: -300px;
+    left: -300px;
+    width: 800px;
+    height: 800px;
+    border-radius: 50%;
+    background: var(--g-glow);
+    opacity: 0.2;
+    pointer-events: none;
+  }
+
+  .proto__grid {
+    position: relative;
+    display: grid;
+    gap: var(--s-6);
+    align-items: start;
+  }
+
+  @media (width >= 64rem) {
+    .proto__grid { grid-template-columns: 5fr 7fr; gap: var(--s-8); }
+    .proto__copy { position: sticky; top: var(--s-8); }
+  }
+
+  .proto__copy { display: flex; flex-direction: column; gap: var(--s-4); }
+  .proto__copy p { max-width: 28rem; font-size: var(--fs-body-lg); }
+
+  .proto__copy h2 :global(.serif-em) {
+    background: var(--g-gold-text);
+    background-size: 220% 100%;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .proto__wl-title { font-size: var(--fs-h2); line-height: 0.94; letter-spacing: -0.04em; }
+
+  /* Formulario */
+  .pf {
+    padding: var(--s-5) var(--s-4);
+    border: 1px solid var(--c-gold-28);
+    border-radius: var(--r-lg);
+    background: var(--c-surface);
+  }
+
+  @media (width >= 40rem) { .pf { padding: var(--s-6); } }
+
+  .pf__grid {
+    display: grid;
+    gap: var(--s-4);
+  }
+
+  @media (width >= 40rem) {
+    .pf__grid { grid-template-columns: 1fr 1fr; }
+    .pf__field--full { grid-column: 1 / -1; }
+  }
+
+  .pf__field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+  .pf__field > label,
+  .pf__radios legend {
+    color: var(--c-ink);
+    font-size: var(--fs-small);
+    font-weight: 500;
+  }
+
+  .pf__opt { color: var(--c-meta); font-weight: 400; }
+
+  .pf input[type="text"],
+  .pf input[type="email"],
+  .pf input[type="tel"],
+  .pf textarea {
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 16px;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-md);
+    background: var(--c-bg);
+    color: var(--c-ink);
+    font-size: 1rem;
+    transition: border-color var(--t-fast) ease;
+  }
+
+  .pf textarea { resize: vertical; }
+  .pf input::placeholder,
+  .pf textarea::placeholder { color: var(--c-meta); }
+
+  .pf input:focus-visible,
+  .pf textarea:focus-visible {
+    border-color: var(--c-gold-60);
+    outline: 2px solid var(--c-gold);
+    outline-offset: 2px;
+  }
+
+  .pf__field[data-error] input,
+  .pf__field[data-error] textarea { border-color: var(--c-error); }
+
+  .pf__hint { color: var(--c-meta); font-size: var(--fs-micro); }
+  .pf__err { color: var(--c-error); font-size: var(--fs-micro); }
+  .pf__err:empty { display: none; }
+
+  /* Radios */
+  .pf__radios { margin: 0; padding: 0; border: 0; }
+  .pf__radios legend { margin-bottom: 6px; padding: 0; }
+  .pf__options { display: grid; gap: var(--s-2); }
+
+  @media (width >= 40rem) { .pf__options { grid-template-columns: repeat(3, 1fr); } }
+
+  .pf__option {
+    position: relative;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    min-height: 52px;
+    padding: 12px 16px;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-md);
+    background: var(--c-bg);
+    color: var(--c-text);
+    font-size: var(--fs-small);
+    cursor: pointer;
+    transition: border-color var(--t-fast) ease, color var(--t-fast) ease;
+  }
+
+  .pf__option:hover { border-color: var(--c-gold-45); }
+
+  .pf__option input {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    border: 1px solid var(--c-line-strong);
+    border-radius: 50%;
+    background: var(--c-bg);
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .pf__option input:checked {
+    border-color: var(--c-gold);
+    background: radial-gradient(circle, var(--c-gold) 0 45%, transparent 50%);
+  }
+
+  .pf__option:has(input:checked) { border-color: var(--c-gold-60); color: var(--c-ink); }
+
+  .pf__option:has(input:focus-visible) {
+    outline: 2px solid var(--c-gold);
+    outline-offset: 2px;
+  }
+
+  .pf__option input:focus-visible { outline: none; }
+  .pf__radios[aria-invalid="true"] .pf__option { border-color: var(--c-error); }
+
+  /* Checkbox */
+  .pf__check {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: var(--fs-small);
+    cursor: pointer;
+  }
+
+  .pf__check input {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    margin: 2px 0 0;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-sm);
+    background: var(--c-bg);
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .pf__check input:checked {
+    border-color: var(--c-gold);
+    background: var(--c-gold);
+    box-shadow: inset 0 0 0 3px var(--c-bg);
+  }
+
+  .pf__check a { color: var(--c-gold); text-decoration: underline; text-underline-offset: 3px; }
+  .pf__field[data-error] .pf__check input { border-color: var(--c-error); }
+
+  .pf__trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  /* Envío */
+  .pf__submit {
+    width: 100%;
+    min-height: 56px;
+    margin-top: var(--s-5);
+    padding: 0 28px;
+    border: 0;
+    border-radius: var(--r-full);
+    background: var(--c-gold);
+    box-shadow: var(--shadow-cta);
+    color: var(--c-on-gold);
+    font-size: 1rem;
+    font-weight: 700;
+    transition: background-color var(--t-fast) ease;
+  }
+
+  .pf__submit:hover { background: var(--c-gold-hover); }
+
+  .pf__submit:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--c-surface), 0 0 0 4px var(--c-gold);
+  }
+
+  .pf__submit:disabled { cursor: progress; opacity: 0.7; }
+
+  .pf__micro {
+    margin-top: var(--s-3);
+    color: var(--c-meta);
+    font-size: var(--fs-micro);
+    text-align: center;
+  }
+
+  .pf__status:empty { display: none; }
+
+  .pf__status {
+    margin-top: var(--s-4);
+    color: var(--c-ink);
+    font-size: var(--fs-small);
+    text-align: center;
+  }
+
+  .pf__status:focus { outline: none; }
+  .pf[data-state="error"] .pf__status { color: var(--c-error); }
+
+  .pf[data-state="ok"] .pf__status {
+    margin-top: 0;
+    padding: var(--s-5) var(--s-3);
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: clamp(1.25rem, 2.2vw, 1.625rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+
+  .pf[data-state="ok"] .pf__status::before {
+    display: block;
+    margin-bottom: var(--s-3);
+    color: var(--c-gold);
+    font-size: 2rem;
+    content: "✓";
+  }
+
+  .pf[data-state="ok"] .pf__micro { display: none; }
+</style>

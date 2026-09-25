@@ -1,0 +1,76 @@
+---
+/**
+ * Steps · pasos numerados con número en contorno (solo para secuencias REALES).
+ * <Steps title="Así funciona" steps={[{ title, text }]} hideTitle />
+ */
+import { pad2 } from '../../lib/text';
+
+interface Props {
+  title: string;
+  steps: { title: string; text: string }[];
+  hideTitle?: boolean;
+}
+const { title, steps, hideTitle = false } = Astro.props;
+---
+
+<div class="steps">
+  <h3 class:list={['steps__title', hideTitle && 'visually-hidden']}>{title}</h3>
+  <ol role="list">
+    {
+      steps.map((s, i) => (
+        <li class="step">
+          <span class="step__num" aria-hidden="true">
+            {pad2(i + 1)}
+          </span>
+          <div>
+            <p class="step__title">{s.title}</p>
+            <p class="step__text">{s.text}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<style>
+  .steps__title {
+    margin-bottom: var(--s-4);
+    color: var(--c-meta);
+    font-family: var(--f-mono);
+    font-size: var(--fs-mono);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--s-4);
+    align-items: end;
+    padding-block: var(--s-4);
+    border-bottom: 1px solid var(--c-line);
+  }
+
+  .step:first-child { border-top: 1px solid var(--c-line); }
+
+  .step__num {
+    min-width: 1.6em;
+    color: transparent;
+    font-family: var(--f-serif);
+    font-size: clamp(4rem, 7vw, 6.5rem);
+    font-style: italic;
+    line-height: 0.78;
+    -webkit-text-stroke: 1px var(--c-gold-60);
+  }
+
+  .step__title {
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: var(--fs-h3);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .step__text { margin-top: var(--s-1); font-size: var(--fs-small); }
+</style>

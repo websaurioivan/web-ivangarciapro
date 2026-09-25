@@ -1,0 +1,77 @@
+---
+/**
+ * LegalLayout · páginas legales con tipografía de lectura y breadcrumbs.
+ * <LegalLayout title="Aviso legal" description="…" updated="25/09/2026">…contenido…</LegalLayout>
+ */
+import BaseLayout from './BaseLayout.astro';
+import { SITE_URL } from '../lib/site';
+import { breadcrumbSchema, graph } from '../lib/seo';
+
+interface Props {
+  title: string;
+  description: string;
+  updated: string;
+}
+const { title, description, updated } = Astro.props;
+const url = new URL(Astro.url.pathname, SITE_URL).href;
+---
+
+<BaseLayout
+  title={`${title} · Iván García`}
+  description={description}
+  pageType="legal"
+  jsonLd={graph(breadcrumbSchema([{ name: 'Inicio', url: SITE_URL }, { name: title, url }]))}
+>
+  <article class="container legal">
+    <nav class="crumbs mono" aria-label="Migas de pan">
+      <a href="/">Inicio</a> / <span aria-current="page">{title}</span>
+    </nav>
+    <h1>{title}</h1>
+    <p class="legal__updated mono">Última actualización: {updated}</p>
+    <div class="prose">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal { padding-block: var(--s-7) var(--s-9); }
+
+  .crumbs { color: var(--c-meta); }
+  .crumbs a { color: var(--c-meta); }
+  .crumbs a:hover { color: var(--c-ink); }
+  .crumbs [aria-current] { color: var(--c-ink); }
+
+  h1 {
+    margin-top: var(--s-5);
+    font-size: var(--fs-h2);
+    line-height: 0.94;
+    letter-spacing: -0.04em;
+  }
+
+  .legal__updated { margin-top: var(--s-3); color: var(--c-meta); }
+
+  .prose { max-width: var(--measure); margin-top: var(--s-6); }
+
+  .prose :global(h2) {
+    margin-top: var(--s-6);
+    font-size: var(--fs-h3);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .prose :global(p),
+  .prose :global(ul) { margin-top: var(--s-3); }
+
+  .prose :global(ul) { padding-left: 1.2em; }
+  .prose :global(li + li) { margin-top: var(--s-1); }
+
+  .prose :global(a) {
+    color: var(--c-gold);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .prose :global(a:hover) { color: var(--c-gold-light); }
+</style>

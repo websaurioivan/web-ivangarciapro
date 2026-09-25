@@ -1,0 +1,198 @@
+/*
+ * tokens.css · Única fuente de valores de diseño (IVAN-DESIGN-SYSTEM.md).
+ * Para reutilizar el proyecto con otra marca, se cambia este archivo y las fuentes.
+ */
+
+@font-face {
+  font-family: "Clash Display";
+  src: url("/fonts/clash-display-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Clash Display";
+  src: url("/fonts/clash-display-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Satoshi;
+  src: url("/fonts/satoshi-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Satoshi;
+  src: url("/fonts/satoshi-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Satoshi;
+  src: url("/fonts/satoshi-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Instrument Serif y JetBrains Mono · solo juego latino (español) */
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("/fonts/instrument-serif-latin-400-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Fallbacks con métricas reales (calculadas con Capsize) → CLS ≈ 0 mientras cargan las fuentes */
+@font-face {
+  font-family: "Clash Fallback";
+  src: local("Arial"), local("ArialMT");
+  size-adjust: 109.91%;
+  ascent-override: 80.97%;
+  descent-override: 22.74%;
+  line-gap-override: 8.19%;
+}
+
+@font-face {
+  font-family: "Satoshi Fallback";
+  src: local("Arial"), local("ArialMT");
+  size-adjust: 98.92%;
+  ascent-override: 102.1%;
+  descent-override: 24.26%;
+  line-gap-override: 10.11%;
+}
+
+@font-face {
+  font-family: "Serif Fallback";
+  src: local("Georgia Italic"), local("Georgia-Italic"), local("Georgia");
+  font-style: italic;
+  size-adjust: 80.53%;
+  ascent-override: 122.94%;
+  descent-override: 38.5%;
+  line-gap-override: 0%;
+}
+
+:root {
+  /* ── Color ─────────────────────────────── */
+  --c-bg: #090807;
+  --c-surface: #110f0c;
+  --c-surface-2: #1a1713;
+  --c-frame-dot: #2a261f;
+  --c-line: rgb(255 236 200 / 8%);
+  --c-line-strong: rgb(255 236 200 / 12%);
+  --c-ghost-border: rgb(247 242 232 / 18%);
+  --c-ink: #f7f2e8;
+  --c-text: #a9a397;
+  --c-meta: #8c867b;
+  --c-muted: #7d776c;
+  --c-gold: #f2b92c;
+  --c-gold-hover: #ffd66e;
+  --c-gold-light: #ffe08a;
+  --c-gold-28: rgb(242 185 44 / 28%);
+  --c-gold-45: rgb(242 185 44 / 45%);
+  --c-gold-60: rgb(242 185 44 / 60%);
+  --c-gold-06: rgb(242 185 44 / 6%);
+  --c-amber: #e9a21a;
+  --c-error: #e8795a;
+  --c-on-gold: #090807;
+
+  /* ── Degradados permitidos ─────────────── */
+  --g-gold-text: linear-gradient(105deg, #ffe9a8 0%, #f2b92c 30%, #b9801f 55%, #ffd66e 80%, #f2b92c 100%);
+  --g-gold-coin: radial-gradient(circle at 30% 25%, #ffe9a8 0%, #f2b92c 45%, #b9801f 100%);
+  --g-footer-name: linear-gradient(180deg, #ffe9a8 0%, #f2b92c 40%, #8a5e17 100%);
+  --g-spot: radial-gradient(circle, rgb(242 185 44 / 26%) 0%, rgb(233 162 26 / 9%) 34%, rgb(9 8 7 / 0%) 64%);
+
+  /* ── Tipografía ────────────────────────── */
+  --f-display: "Clash Display", "Clash Fallback", system-ui, sans-serif;
+  --f-sans: satoshi, "Satoshi Fallback", system-ui, sans-serif;
+  --f-serif: "Instrument Serif", "Serif Fallback", georgia, serif;
+  --f-mono: "JetBrains Mono", ui-monospace, monospace;
+  --fs-display: clamp(3.25rem, 11vw, 11.5rem);
+  --fs-hero: clamp(3.25rem, 7.4vw, 8.25rem);
+  --fs-h2: clamp(2.375rem, 6.4vw, 5.75rem);
+  --fs-lead: clamp(1.875rem, 4.2vw, 3.875rem);
+  --fs-h3: clamp(1.5rem, 2.6vw, 2rem);
+  --fs-body-lg: clamp(1.0625rem, 1.5vw, 1.25rem);
+  --fs-body: 1.125rem;
+  --fs-small: 0.9375rem;
+  --fs-micro: 0.8125rem;
+  --fs-mono: 0.75rem;
+  --fs-ribbon: clamp(1.375rem, 2.6vw, 2.25rem);
+  --fs-footer-name: min(19vw, 20rem);
+
+  /* ── Espaciado · base 4 ───────────────── */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 16px;
+  --s-4: 24px;
+  --s-5: 32px;
+  --s-6: 48px;
+  --s-7: 64px;
+  --s-8: 96px;
+  --s-9: 160px;
+  --gutter: clamp(20px, 4vw, 48px);
+  --container: 1360px;
+  --section-y: clamp(80px, 12vw, 160px);
+  --measure: 68ch;
+
+  /* ── Radios ────────────────────────────── */
+  --r-sm: 8px;
+  --r-md: 18px;
+  --r-lg: 28px;
+  --r-full: 999px;
+  --r-demo-sm: 1.6cqi;
+  --r-demo-md: 2cqi;
+  --r-demo-lg: 2.4cqi;
+  --r-demo-xl: 3cqi;
+
+  /* ── Efectos ───────────────────────────── */
+  --shadow-cta: inset 0 1px 0 rgb(255 240 200 / 70%), 0 18px 50px -14px rgb(242 185 44 / 70%);
+  --shadow-ribbon: inset 0 1px 0 rgb(255 240 200 / 80%), 0 30px 80px -30px rgb(242 185 44 / 60%);
+  --shadow-dot: 0 0 18px 2px rgb(242 185 44 / 70%);
+  --shadow-dot-sm: 0 0 10px rgb(242 185 44 / 90%);
+  --shadow-frame: 0 60px 120px -60px rgb(242 185 44 / 35%);
+  --g-glow: radial-gradient(closest-side, rgb(233 162 26 / 100%) 0%, rgb(233 162 26 / 45%) 45%, rgb(233 162 26 / 0%) 100%);
+  --glow-opacity: 0.28;
+
+  /* ── Movimiento ────────────────────────── */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --t-fast: 0.3s;
+  --t-med: 0.35s;
+  --t-slow: 0.6s;
+  --t-sweep: 1.4s;
+  --ribbon-duration: 90s;
+
+  /* ── Capas ─────────────────────────────── */
+  --z-header: 40;
+  --z-sticky: 45;
+  --z-menu: 50;
+  --z-toast: 70;
+}

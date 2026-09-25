@@ -1,0 +1,205 @@
+---
+/**
+ * Header · cabecera sólida (sin cristal). Escritorio: navegación + CTA ghost.
+ * Móvil: botón de texto «Menú» que abre un <dialog> a pantalla completa (foco atrapado y Esc nativos).
+ */
+import Logo from '../ui/Logo.astro';
+import Button from '../ui/Button.astro';
+import { NAV } from '../../lib/site';
+
+const current = Astro.url.pathname;
+---
+
+<header class="header">
+  <div class="container header__inner">
+    <Logo />
+    <nav class="header__nav" aria-label="Principal">
+      <ul role="list">
+        {
+          NAV.map((item) => (
+            <li>
+              <a href={item.href} aria-current={current === item.href ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <div class="header__cta">
+      <Button href="/diseno-web" variant="ghost" cta="header_service" placement="header" intent="service">
+        Quiero mi web
+      </Button>
+    </div>
+    <button class="header__menu-btn" type="button" aria-haspopup="dialog" aria-controls="menu" data-menu-open>
+      Menú
+    </button>
+  </div>
+</header>
+
+<dialog class="menu" id="menu" aria-label="Menú">
+  <div class="menu__glow" aria-hidden="true"></div>
+  <div class="container menu__top">
+    <Logo />
+    <button class="header__menu-btn menu__close" type="button" data-menu-close>Cerrar</button>
+  </div>
+  <nav class="container menu__nav" aria-label="Principal (móvil)">
+    <ul role="list">
+      {
+        NAV.map((item) => (
+          <li>
+            <a href={item.href} data-menu-link>
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+  <div class="container menu__foot">
+    <Button href="/recursos" variant="gold" arrow full cta="menu_learn" placement="menu" intent="learn">
+      Aprender gratis
+    </Button>
+    <Button href="/diseno-web" variant="ghost" full cta="menu_service" placement="menu" intent="service">
+      Quiero mi web
+    </Button>
+  </div>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('#menu');
+  const openBtn = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+  openBtn?.addEventListener('click', () => {
+    dialog?.showModal();
+    document.documentElement.style.overflow = 'hidden';
+  });
+  dialog?.querySelector('[data-menu-close]')?.addEventListener('click', () => dialog.close());
+  dialog?.querySelectorAll('[data-menu-link]').forEach((a) => a.addEventListener('click', () => dialog.close()));
+  dialog?.addEventListener('close', () => {
+    document.documentElement.style.overflow = '';
+    openBtn?.focus();
+  });
+</script>
+
+<style>
+  .header {
+    position: relative;
+    z-index: var(--z-header);
+    border-bottom: 1px solid var(--c-line);
+    background: var(--c-bg);
+  }
+
+  .header__inner {
+    display: flex;
+    gap: var(--s-4);
+    align-items: center;
+    justify-content: space-between;
+    min-height: 72px;
+  }
+
+  .header__nav,
+  .header__cta { display: none; }
+
+  .header__nav ul { display: flex; gap: var(--s-5); }
+
+  .header__nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--c-text);
+    font-size: var(--fs-small);
+    font-weight: 500;
+  }
+
+  .header__nav a:hover,
+  .header__nav a[aria-current="page"] { color: var(--c-ink); }
+
+  .header__cta :global(.btn) { min-height: 44px; padding-inline: 20px; font-size: var(--fs-small); }
+
+  .header__menu-btn {
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--c-ghost-border);
+    border-radius: var(--r-full);
+    background: transparent;
+    color: var(--c-ink);
+    font-size: var(--fs-small);
+    font-weight: 500;
+  }
+
+  @media (width >= 64rem) {
+    .header__nav,
+    .header__cta { display: block; }
+
+    .header__menu-btn { display: none; }
+  }
+
+  /* Menú móvil */
+  .menu {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    padding: 0;
+    overflow: hidden auto;
+    border: 0;
+    background: var(--c-bg);
+    color: var(--c-text);
+  }
+
+  .menu[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .menu::backdrop { background: var(--c-bg); }
+
+  .menu__glow {
+    position: absolute;
+    bottom: -320px;
+    left: 50%;
+    width: 640px;
+    height: 640px;
+    border-radius: 50%;
+    background: var(--g-glow);
+    opacity: var(--glow-opacity);
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .menu__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 72px;
+    border-bottom: 1px solid var(--c-line);
+  }
+
+  .menu__nav {
+    position: relative;
+    flex: 1;
+    padding-block: var(--s-6);
+  }
+
+  .menu__nav a {
+    display: block;
+    padding-block: var(--s-2);
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: 2.5rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+  }
+
+  .menu__nav a:hover { color: var(--c-gold); }
+
+  .menu__foot {
+    position: relative;
+    display: grid;
+    gap: var(--s-2);
+    padding-block: var(--s-4) max(var(--s-5), env(safe-area-inset-bottom));
+  }
+</style>

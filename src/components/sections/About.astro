@@ -1,0 +1,59 @@
+---
+/**
+ * About · quién es Iván. Foto real (placeholder hasta tenerla) + texto breve + enlace al canal.
+ */
+import Placeholder from '../ui/Placeholder.astro';
+import Button from '../ui/Button.astro';
+import { emph } from '../../lib/text';
+
+interface Props {
+  data: { title: string; text: string; link: { label: string; href: string }; photoAlt: string };
+  youtubeUrl: string;
+}
+const { data, youtubeUrl } = Astro.props;
+const href = youtubeUrl || data.link.href;
+---
+
+<section class="section about" aria-labelledby="about-title">
+  <div class="container about__grid">
+    <Placeholder label="Retrato de Iván · fondo oscuro, luz dorada" ratio="4/5" class="about__photo" />
+    <div class="about__copy">
+      <h2 id="about-title" set:html={emph(data.title)} />
+      <p class="about__text">{data.text}</p>
+      <Button href={href} variant="text" arrow cta="about_youtube" placement="about" intent="learn">
+        {data.link.label}
+      </Button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about__grid {
+    display: grid;
+    gap: var(--s-6);
+    align-items: end;
+  }
+
+  @media (width >= 48rem) {
+    .about__grid { grid-template-columns: 5fr 7fr; gap: var(--s-7); }
+  }
+
+  .about :global(.about__photo) { max-width: 460px; }
+
+  .about__copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+    align-items: flex-start;
+  }
+
+  .about__text {
+    max-width: 34rem;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: clamp(1.375rem, 2.4vw, 2rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+</style>

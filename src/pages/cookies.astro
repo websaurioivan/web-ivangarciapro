@@ -1,0 +1,28 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+import { getSettings } from '../lib/site';
+const { gtmId } = await getSettings();
+---
+
+<LegalLayout title="Política de cookies" description="Qué cookies usa ivangarcia.pro y cómo gestionarlas." updated="25/09/2026">
+  <h2>Qué son</h2>
+  <p>Las cookies son pequeños archivos que un sitio guarda en tu navegador. Algunas son necesarias para que funcione; otras sirven para medir el uso.</p>
+
+  <h2>Cookies de este sitio</h2>
+  {
+    gtmId ? (
+      <ul>
+        <li><strong>Técnica (preferencia de cookies):</strong> recuerda si aceptaste o rechazaste la analítica. Se guarda en tu navegador.</li>
+        <li><strong>Analítica (Google Analytics vía Google Tag Manager):</strong> mide qué páginas y contenidos se usan más. Solo se activa si aceptas.</li>
+      </ul>
+    ) : (
+      <p>Ahora mismo este sitio no usa cookies de analítica ni de publicidad. Si se activan en el futuro, te pediré permiso antes.</p>
+    )
+  }
+
+  <h2>Vídeos de YouTube</h2>
+  <p>Los vídeos solo se cargan cuando pulsas en ellos, desde el dominio youtube-nocookie.com. Al reproducirlos, YouTube puede aplicar sus propias cookies.</p>
+
+  <h2>Cómo gestionarlas</h2>
+  <p>Puedes cambiar tu elección borrando las cookies y el almacenamiento de este sitio en tu navegador; el aviso volverá a aparecer.</p>
+</LegalLayout>

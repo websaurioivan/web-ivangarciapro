@@ -1,0 +1,75 @@
+---
+/**
+ * Fears · «Lo que te preocupa, resuelto». Filas miedo → respuesta (objeciones del briefing).
+ * <Fears title="…" intro="…" rows={[{ fear, answer }]} />
+ */
+import { emph } from '../../lib/text';
+
+interface Props {
+  title: string;
+  intro: string;
+  rows: { fear: string; answer: string }[];
+}
+const { title, intro, rows } = Astro.props;
+---
+
+<section class="section fears" aria-labelledby="fears-title">
+  <div class="container">
+    <div class="section-head">
+      <h2 id="fears-title" set:html={emph(title)} />
+      <p>{intro}</p>
+    </div>
+    <dl class="fears__list">
+      {
+        rows.map((r) => (
+          <div class="fears__row">
+            <dt>
+              <span class="fears__tag mono">Te preocupa</span>
+              {r.fear}
+            </dt>
+            <dd>
+              <span aria-hidden="true">✓</span> {r.answer}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+<style>
+  .fears__list { border-top: 1px solid var(--c-line); }
+
+  .fears__row {
+    display: grid;
+    gap: var(--s-2) var(--s-6);
+    padding-block: var(--s-5);
+    border-bottom: 1px solid var(--c-line);
+  }
+
+  @media (width >= 56rem) {
+    .fears__row { grid-template-columns: 5fr 7fr; align-items: baseline; }
+  }
+
+  .fears__row dt {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: clamp(1.375rem, 2.4vw, 2rem);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+
+  .fears__tag { color: var(--c-meta); letter-spacing: 0.02em; }
+
+  .fears__row dd {
+    margin: 0;
+    font-size: clamp(1.0625rem, 1.5vw, 1.1875rem);
+    line-height: 1.5;
+  }
+
+  .fears__row dd span { margin-right: 10px; color: var(--c-gold); }
+</style>

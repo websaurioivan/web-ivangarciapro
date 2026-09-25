@@ -1,0 +1,137 @@
+---
+/**
+ * Footer · enlaces, legal, aviso de afiliación y «Iván García» gigante del manual.
+ */
+import { LEGAL_LINKS, getSettings } from '../../lib/site';
+
+const settings = await getSettings();
+const year = new Date().getFullYear();
+const youtube = settings.youtubeUrl || '#';
+
+const columns = [
+  {
+    title: 'Aprende',
+    links: [
+      { label: 'Recursos', href: '/recursos' },
+      { label: 'Guías', href: '/guias' },
+      { label: 'Newsletter', href: '/#newsletter' },
+      { label: 'YouTube', href: youtube },
+    ],
+  },
+  {
+    title: 'Servicio',
+    links: [
+      { label: 'Diseño web', href: '/diseno-web' },
+      { label: 'Prototipo gratis', href: '/diseno-web#prototipo' },
+    ],
+  },
+  {
+    title: 'Iván',
+    links: [
+      { label: 'Sobre mí', href: '/sobre-mi' },
+      { label: 'Contacto', href: `mailto:${settings.legal.email}` },
+    ],
+  },
+  { title: 'Legal', links: [...LEGAL_LINKS] },
+];
+---
+
+<footer class="footer">
+  <div class="footer__glow" aria-hidden="true"></div>
+  <div class="container footer__cols">
+    {
+      columns.map((col) => (
+        <nav class="footer__col" aria-label={col.title}>
+          <p class="footer__title">{col.title}</p>
+          <ul role="list">
+            {col.links.map((l) => (
+              <li>
+                <a href={l.href}>{l.label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ))
+    }
+  </div>
+  <div class="container footer__legal">
+    <p>© {year} {settings.legal.owner}</p>
+    <p>Algunos enlaces son de afiliado: yo gano comisión, tú no pagas más.</p>
+  </div>
+  <p class="footer__name" aria-hidden="true">Iván García</p>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    padding-top: var(--s-7);
+    overflow: hidden;
+    border-top: 1px solid var(--c-line);
+  }
+
+  .footer__glow {
+    position: absolute;
+    bottom: -300px;
+    left: 50%;
+    width: 900px;
+    height: 500px;
+    border-radius: 50%;
+    background: var(--g-glow);
+    opacity: 0.25;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .footer__cols {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+    gap: var(--s-5) var(--s-4);
+  }
+
+  .footer__title {
+    margin-bottom: var(--s-2);
+    color: var(--c-meta);
+    font-family: var(--f-mono);
+    font-size: var(--fs-mono);
+  }
+
+  .footer__col a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    color: var(--c-text);
+    font-size: var(--fs-small);
+  }
+
+  .footer__col a:hover { color: var(--c-ink); }
+
+  .footer__legal {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-5);
+    justify-content: space-between;
+    margin-top: var(--s-7);
+    color: var(--c-meta);
+    font-size: var(--fs-micro);
+  }
+
+  .footer__name {
+    position: relative;
+    margin-top: var(--s-6);
+    padding-right: 0.06em;
+    background: var(--g-footer-name);
+    background-clip: text;
+    color: transparent;
+    font-family: var(--f-serif);
+    font-size: var(--fs-footer-name);
+    font-style: italic;
+    letter-spacing: -0.03em;
+    line-height: 0.8;
+    text-align: center;
+    white-space: nowrap;
+    transform: translateY(12%);
+    user-select: none;
+  }
+</style>

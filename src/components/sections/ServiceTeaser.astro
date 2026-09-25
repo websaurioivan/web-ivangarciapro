@@ -1,0 +1,129 @@
+---
+/**
+ * ServiceTeaser · «¿Prefieres que la haga yo?» (Home). Presenta el servicio y lleva a /diseno-web.
+ * Único CTA de oro: prototipo gratis en 24 h (sin newsletter aquí).
+ * Piezas compartidas con /diseno-web: Steps, CompareWordPress, ServicePlans, QuotaEyebrow.
+ */
+import Button from '../ui/Button.astro';
+import Steps from '../service/Steps.astro';
+import CompareWordPress from '../service/CompareWordPress.astro';
+import ServicePlans from '../service/ServicePlans.astro';
+import QuotaEyebrow from '../service/QuotaEyebrow.astro';
+import { emph } from '../../lib/text';
+
+interface Props {
+  data: {
+    title: string;
+    intro: string;
+    compareTitle: string;
+    compareIntro: string;
+    compare: { yes: string; no: string }[];
+    stepsTitle: string;
+    steps: { title: string; text: string }[];
+    cta: { label: string; href: string };
+    microcopy: string;
+    servicesLink: { label: string; href: string };
+  };
+  perWeek: number;
+}
+const { data, perWeek } = Astro.props;
+---
+
+<section class="section service" id="servicio" aria-labelledby="service-title">
+  <div class="service__glow" aria-hidden="true"></div>
+  <div class="container">
+    <div class="section-head">
+      <h2 id="service-title" set:html={emph(data.title)} />
+      <p>{data.intro}</p>
+    </div>
+
+    <div class="offer">
+      <Steps title={data.stepsTitle} steps={data.steps} hideTitle />
+
+      <div class="offer__panel" data-gold-zone>
+        <QuotaEyebrow perWeek={perWeek} />
+        <p class="offer__claim">Prototipo <em class="serif-em">gratis</em> en 24 horas</p>
+        <Button href={data.cta.href} variant="gold" arrow full cta="service_prototype" placement="home_service" intent="service">
+          {data.cta.label}
+        </Button>
+        <p class="offer__micro">{data.microcopy}</p>
+      </div>
+    </div>
+
+    <div class="service__block">
+      <CompareWordPress title={data.compareTitle} intro={data.compareIntro} rows={data.compare} />
+    </div>
+
+    <div class="service__block">
+      <ServicePlans note="Precios orientativos. Todas las modalidades incluyen 1 año de hosting, dominio y mantenimiento." />
+      <div class="plans__foot">
+        <Button href={data.servicesLink.href} variant="text" arrow cta="service_details" placement="home_service" intent="service">
+          {data.servicesLink.label}
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .service { overflow: hidden; }
+
+  .service__glow {
+    position: absolute;
+    top: 20%;
+    left: -420px;
+    width: 760px;
+    height: 760px;
+    border-radius: 50%;
+    background: var(--g-glow);
+    opacity: 0.18;
+    pointer-events: none;
+  }
+
+  .service .container { position: relative; }
+
+  .offer {
+    display: grid;
+    gap: var(--s-6);
+    align-items: start;
+  }
+
+  @media (width >= 56rem) {
+    .offer { grid-template-columns: 7fr 5fr; gap: var(--s-7); }
+  }
+
+  .offer__panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+    padding: var(--s-5);
+    border: 1px solid var(--c-gold-28);
+    border-radius: var(--r-lg);
+    background: var(--c-surface);
+  }
+
+  .offer__claim {
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: clamp(2rem, 3.4vw, 2.75rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+
+  .offer__micro {
+    margin-top: calc(var(--s-2) * -1);
+    color: var(--c-meta);
+    font-size: var(--fs-micro);
+    text-align: center;
+  }
+
+  .service__block { margin-top: var(--s-8); }
+
+  .plans__foot {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--s-2);
+  }
+</style>

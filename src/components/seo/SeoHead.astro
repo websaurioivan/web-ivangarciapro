@@ -1,0 +1,59 @@
+---
+/**
+ * SeoHead · metas únicas, canonical, Open Graph, Twitter Card y JSON-LD.
+ * <SeoHead title="…" description="…" jsonLd={graph(...)} />
+ */
+import { SITE_URL } from '../../lib/site';
+
+interface Props {
+  title: string;
+  description: string;
+  path?: string;
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article';
+  noindex?: boolean | undefined;
+  jsonLd?: object | undefined;
+}
+const {
+  title,
+  description,
+  path = Astro.url.pathname,
+  image = '/og/og-default.png',
+  imageAlt = 'Iván García · Webs que impactan, venden y posicionan',
+  type = 'website',
+  noindex = false,
+  jsonLd,
+} = Astro.props;
+
+const canonical = new URL(path.replace(/\/$/, '') || '/', SITE_URL).href;
+const ogImage = new URL(image, SITE_URL).href;
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{
+  import.meta.env.PUBLIC_STAGING === 'true' ? (
+    <meta name="robots" content="noindex, nofollow" />
+  ) : (
+    noindex && <meta name="robots" content="noindex, follow" />
+  )
+}}
+
+<meta property="og:type" content={type} />
+<meta property="og:locale" content="es_ES" />
+<meta property="og:site_name" content="Iván García" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={imageAlt} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+{jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}

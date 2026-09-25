@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+---
+
+<BaseLayout title="Página no encontrada · Iván García" description="Esta página no existe. Vuelve al inicio, a los recursos o al servicio de diseño web." pageType="404" noindex>
+  <section class="container nf">
+    <p class="nf__num" aria-hidden="true">404</p>
+    <h1>Esta página <em class="serif-em">no</em> existe</h1>
+    <p class="nf__text">Puede que el enlace esté mal o que la haya movido. Elige por dónde seguir:</p>
+    <div class="nf__links">
+      <Button href="/" variant="gold" arrow cta="404_home" placement="404">Volver al inicio</Button>
+      <Button href="/recursos" variant="ghost" cta="404_learn" placement="404" intent="learn">Recursos</Button>
+      <Button href="/diseno-web" variant="ghost" cta="404_service" placement="404" intent="service">Diseño web</Button>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-block: var(--s-8) var(--s-9);
+  }
+
+  .nf__num {
+    color: transparent;
+    font-family: var(--f-serif);
+    font-size: clamp(8rem, 22vw, 16rem);
+    font-style: italic;
+    line-height: 0.8;
+    -webkit-text-stroke: 1.2px var(--c-gold-60);
+  }
+
+  h1 {
+    margin-top: var(--s-5);
+    font-size: var(--fs-h2);
+    line-height: 0.94;
+    letter-spacing: -0.04em;
+  }
+
+  .nf__text { margin-top: var(--s-4); font-size: var(--fs-body-lg); }
+
+  .nf__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: var(--s-5);
+  }
+</style>

@@ -1,0 +1,22 @@
+name: Marca personal
+order: 2
+forWho: Para profesionales que quieren que les elijan a ellos, no a cualquiera.
+includes:
+  - Diseño único, sin plantillas
+  - Textos orientados a conversión
+  - SEO técnico de base
+  - Panel para editar tus textos
+plans:
+  - mode: unico
+    price: '[1.190 €]'
+    provisional: true
+  - mode: fraccionado
+    price: '[1.190 €]'
+    monthly: '[3 × 397 €]'
+    provisional: true
+  - mode: renting
+    price: ''
+    upfront: '[149 €]'
+    monthly: '[59 €/mes]'
+    months: 24
+    provisional: true

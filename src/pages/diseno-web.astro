@@ -1,0 +1,134 @@
+---
+/**
+ * /diseno-web · landing del servicio. Una sola conversión: pedir el prototipo gratis (o lista de espera).
+ * Contenido: src/content/pages/diseno-web.json (Keystatic → «Diseño web (servicio)»).
+ */
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ServiceHero from '../components/service/ServiceHero.astro';
+import Works from '../components/sections/Works.astro';
+import Fears from '../components/service/Fears.astro';
+import Steps from '../components/service/Steps.astro';
+import ServicePlans from '../components/service/ServicePlans.astro';
+import ModesTable from '../components/service/ModesTable.astro';
+import CompareWordPress from '../components/service/CompareWordPress.astro';
+import Faq from '../components/service/Faq.astro';
+import PrototypeForm from '../components/forms/PrototypeForm.astro';
+import Button from '../components/ui/Button.astro';
+// Diseño de testimonios para esta página (alternativas en src/components/testimonials/)
+import Testimonials from '../components/testimonials/BeforeAfter.astro';
+import { getSettings, SITE_URL } from '../lib/site';
+import { getTestimonials } from '../lib/testimonials';
+import { breadcrumbSchema, graph, personSchema } from '../lib/seo';
+import { emph, plain } from '../lib/text';
+
+const page = (await getEntry('disenoWeb', 'diseno-web'))?.data;
+if (!page) throw new Error('Falta src/content/pages/diseno-web.json');
+const settings = await getSettings();
+const testimonials = await getTestimonials();
+const url = `${SITE_URL}/diseno-web`;
+
+const types = [
+  { value: 'corporativa', label: 'Web corporativa' },
+  { value: 'marca-personal', label: 'Marca personal' },
+  { value: 'landing', label: 'Landing page' },
+];
+
+const jsonLd = graph(
+  personSchema(settings),
+  {
+    '@type': 'Service',
+    '@id': `${url}#servicio`,
+    name: 'Diseño web profesional',
+    serviceType: 'Diseño y desarrollo web',
+    description: page.seo.description,
+    provider: { '@id': `${SITE_URL}/#ivan` },
+    areaServed: 'Países de habla hispana',
+    availableLanguage: 'es',
+    url,
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Tipos de web',
+      itemListElement: types.map((t) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: t.label } })),
+    },
+  },
+  {
+    '@type': 'FAQPage',
+    mainEntity: page.faq.items.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+  breadcrumbSchema([
+    { name: 'Inicio', url: SITE_URL },
+    { name: 'Diseño web', url },
+  ]),
+);
+---
+
+<BaseLayout
+  title={page.seo.title}
+  description={page.seo.description}
+  pageType="service"
+  jsonLd={jsonLd}
+  sticky={{ href: '#prototipo', label: 'Quiero mi prototipo gratis', cta: 'sticky_prototype', intent: 'service' }}
+>
+  <ServiceHero data={page.hero} perWeek={settings.prototypesPerWeek} crumbs={[{ label: 'Inicio', href: '/' }, { label: 'Diseño web' }]} />
+
+  <div id="trabajos">
+    <Works data={page.works} />
+  </div>
+
+  <Fears title={page.fears.title} intro={page.fears.intro} rows={page.fears.rows} />
+
+  <section class="section" aria-labelledby="process-title">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="process-title" set:html={emph(page.process.title)} />
+        <p>{page.process.intro}</p>
+      </div>
+      <Steps title={plain(page.process.title)} steps={page.process.steps} hideTitle />
+      <div class="dw-cta" data-gold-zone>
+        <Button href="#prototipo" variant="gold" arrow cta="service_process_prototype" placement="service_process" intent="service">
+          Quiero mi prototipo gratis
+        </Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="plans-title">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="plans-title" set:html={emph(page.plans.title)} />
+        <p>{page.plans.intro}</p>
+      </div>
+      <ServicePlans detailed delivery={page.plans.delivery} note={page.plans.note} />
+    </div>
+  </section>
+
+  <ModesTable
+    title={page.modes.title}
+    intro={page.modes.intro}
+    columns={page.modes.columns}
+    rows={page.modes.rows}
+    extrasTitle={page.modes.extrasTitle}
+    extras={page.modes.extras}
+  />
+
+  <section class="section" aria-labelledby="compare-title">
+    <div class="container">
+      <CompareWordPress id="compare-title" level="h2" title={page.compare.title} intro={page.compare.intro} rows={page.compare.rows} />
+    </div>
+  </section>
+
+  <Testimonials id="dw-testimonios" title={page.testimonials.title} items={testimonials} />
+
+  <Faq title={page.faq.title} items={page.faq.items} />
+
+  <PrototypeForm data={page.form} types={types} />
+</BaseLayout>
+
+<style>
+  .dw-cta { margin-top: var(--s-6); }
+</style>

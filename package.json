@@ -1,0 +1,38 @@
+{
+  "name": "ivangarcia-pro",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "build:admin": "cross-env KEYSTATIC=true astro build",
+    "preview": "astro preview",
+    "check": "astro check && npm run lint:css",
+    "lint:css": "stylelint \"src/**/*.{css,astro}\""
+  },
+  "dependencies": {
+    "@astrojs/react": "^7.0.0",
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource/instrument-serif": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@keystatic/astro": "^6.0.0",
+    "@keystatic/core": "^0.6.9",
+    "astro": "^7.3.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "latest",
+    "cross-env": "^7.0.3",
+    "postcss-html": "^1.8.0",
+    "stylelint": "^16.0.0",
+    "stylelint-config-html": "^1.1.0",
+    "stylelint-config-standard": "^38.0.0",
+    "stylelint-declaration-strict-value": "^1.10.0",
+    "typescript": "^5.9.0"
+  }
+}

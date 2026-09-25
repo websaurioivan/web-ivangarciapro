@@ -1,0 +1,97 @@
+---
+/**
+ * Consent · banner de cookies RGPD + carga de GTM con Consent Mode v2.
+ * Solo se renderiza si hay gtmId en Ajustes: sin analítica no hay cookies que consentir.
+ * «Rechazar» y «Aceptar» con el mismo peso visual (AEPD).
+ */
+interface Props {
+  gtmId: string;
+}
+const { gtmId } = Astro.props;
+---
+
+{
+  gtmId && (
+    <>
+      <script is:inline define:vars={{ gtmId }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { window.dataLayer.push(arguments); }
+        gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied' });
+        let choice = null;
+        try { choice = localStorage.getItem('ig-consent'); } catch (e) {}
+        window.__loadGtm = function () {
+          if (window.__gtmLoaded) return;
+          window.__gtmLoaded = true;
+          window.__analyticsConsent = true;
+          gtag('consent', 'update', { analytics_storage: 'granted' });
+          window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+          const s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtm.js?id=' + gtmId;
+          document.head.appendChild(s);
+        };
+        if (choice === 'granted') window.__loadGtm();
+        window.__consentChoice = choice;
+      </script>
+      <div class="consent" data-consent hidden role="region" aria-label="Preferencias de cookies">
+        <p>
+          Uso cookies de analítica para saber qué contenidos te ayudan más. Solo si aceptas.{' '}
+          <a href="/cookies">Más información</a>
+        </p>
+        <div class="consent__actions">
+          <button type="button" data-consent-choice="denied">Rechazar</button>
+          <button type="button" data-consent-choice="granted">Aceptar</button>
+        </div>
+      </div>
+      <script is:inline>
+        (function () {
+          const box = document.querySelector('[data-consent]');
+          if (!box) return;
+          if (!window.__consentChoice) box.hidden = false;
+          box.querySelectorAll('[data-consent-choice]').forEach(function (b) {
+            b.addEventListener('click', function () {
+              const v = b.getAttribute('data-consent-choice');
+              try { localStorage.setItem('ig-consent', v); } catch (e) {}
+              if (v === 'granted') window.__loadGtm();
+              box.hidden = true;
+            });
+          });
+        })();
+      </script>
+    </>
+  )
+}
+
+<style>
+  .consent {
+    position: fixed;
+    right: var(--gutter);
+    bottom: var(--gutter);
+    left: var(--gutter);
+    z-index: var(--z-toast);
+    display: grid;
+    gap: var(--s-3);
+    max-width: 560px;
+    padding: var(--s-4);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: var(--c-surface-2);
+    font-size: var(--fs-small);
+  }
+
+  .consent[hidden] { display: none; }
+  .consent a { text-decoration: underline; text-underline-offset: 3px; }
+  .consent__actions { display: flex; gap: var(--s-2); }
+
+  .consent__actions button {
+    flex: 1;
+    min-height: 48px;
+    border: 1px solid var(--c-ghost-border);
+    border-radius: var(--r-full);
+    background: transparent;
+    color: var(--c-ink);
+    font-weight: 500;
+  }
+
+  .consent__actions button:hover { border-color: var(--c-gold-60); }
+</style>

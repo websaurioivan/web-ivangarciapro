@@ -1,0 +1,11 @@
+title: '[Proyecto real 2]'
+client: '[Cliente]'
+sector: '[Sector]'
+url: ''
+need: '[Qué necesitaba el negocio, en una frase.]'
+done: '[Qué hicimos, en una frase.]'
+result: ''
+tags:
+  - '[Landing page]'
+order: 2
+featured: true

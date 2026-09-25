@@ -1,0 +1,93 @@
+---
+/**
+ * Testimonios · ANTES / DESPUÉS. Patrón ✓/✕ de la sección «Voz» del manual:
+ * el problema tachado a la izquierda y la frase del cliente a la derecha. El que más vende (habla del resultado).
+ * Requiere el campo `before` en cada testimonio. Ideal en /diseno-web.
+ * <BeforeAfter id="tst-ba" title="Lo que *cambió*" items={await getTestimonials()} limit={4} />
+ */
+import { emph } from '../../lib/text';
+import type { Testimonial } from '../../lib/testimonials';
+
+interface Props {
+  id: string;
+  title: string;
+  items: Testimonial[];
+  limit?: number;
+}
+const { id, title, items, limit = 4 } = Astro.props;
+const list = items.filter((t) => t.before).slice(0, limit);
+---
+
+<section class="section ts-ba" aria-labelledby={`${id}-title`}>
+  <div class="container">
+    <h2 id={`${id}-title`} class="ts-ba__title" set:html={emph(title)} />
+    <div class="ba__head mono" aria-hidden="true"><span>Antes</span><span>Después</span></div>
+    {
+      list.map((t) => (
+        <figure class="ba__row">
+          <p class="ba__before">
+            <span aria-hidden="true">✕</span>
+            <span class="visually-hidden">Antes: </span>
+            {t.before}
+          </p>
+          <div class="ba__after">
+            <blockquote>
+              <span aria-hidden="true">✓</span>
+              <span class="visually-hidden">Después: </span>
+              {t.quote}
+            </blockquote>
+            <figcaption class="mono">
+              {t.name} · {t.role}
+            </figcaption>
+          </div>
+        </figure>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .ts-ba__title { margin-bottom: var(--s-6); }
+
+  .ba__head {
+    display: none;
+    padding-block: var(--s-2);
+    border-top: 1px solid var(--c-line);
+    color: var(--c-meta);
+  }
+
+  .ba__row {
+    display: grid;
+    gap: var(--s-3) var(--s-5);
+    margin: 0;
+    padding-block: var(--s-5);
+    border-bottom: 1px solid var(--c-line);
+  }
+
+  .ba__row:first-of-type { border-top: 1px solid var(--c-line); }
+
+  @media (width >= 48rem) {
+    .ba__head { display: grid; grid-template-columns: 1fr 1.3fr; gap: var(--s-5); }
+    .ba__row { grid-template-columns: 1fr 1.3fr; }
+    .ba__row:first-of-type { border-top: 0; }
+  }
+
+  .ba__before {
+    color: var(--c-meta);
+    font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+    text-decoration: line-through;
+    text-decoration-color: var(--c-line-strong);
+  }
+
+  .ba__before > span:first-child { margin-right: 10px; }
+
+  .ba__after blockquote {
+    margin: 0;
+    color: var(--c-ink);
+    font-size: clamp(1.125rem, 1.8vw, 1.375rem);
+    line-height: 1.4;
+  }
+
+  .ba__after blockquote > span:first-child { margin-right: 10px; color: var(--c-gold); }
+  .ba__after figcaption { margin-top: var(--s-2); color: var(--c-meta); }
+</style>

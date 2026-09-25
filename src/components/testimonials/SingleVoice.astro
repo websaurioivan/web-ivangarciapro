@@ -1,0 +1,126 @@
+---
+/**
+ * Testimonios · UNA SOLA VOZ. Un testimonio en grande como titular; debajo, los nombres con el punto de oro en el activo.
+ * Editorial y sobrio; ideal junto al CTA del servicio. Usa *asteriscos* en el testimonio para el énfasis serif.
+ * <SingleVoice id="tst-voice" title="Lo que dicen *mis clientes*" items={await getTestimonials()} />
+ */
+import { emph } from '../../lib/text';
+import { pad2, type Testimonial } from '../../lib/testimonials';
+
+interface Props {
+  id: string;
+  title: string;
+  items: Testimonial[];
+}
+const { id, title, items } = Astro.props;
+---
+
+<section class="section ts-voice" aria-labelledby={`${id}-title`}>
+  <div class="container" data-voice>
+    <h2 id={`${id}-title`} class="visually-hidden" set:html={emph(title)} />
+    <div aria-live="polite">
+      {
+        items.map((t, i) => (
+          <figure class="voice__panel" data-voice-panel={i} hidden={i !== 0}>
+            <span class="voice__num" aria-hidden="true">
+              {pad2(i + 1)}
+            </span>
+            <blockquote class="voice__quote" set:html={`“${emph(t.quote)}”`} />
+            <figcaption class="mono">
+              {t.name} · {t.role}
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+    <div class="voice__tabs" role="group" aria-label="Elegir testimonio">
+      {
+        items.map((t, i) => (
+          <button type="button" class="voice__tab" data-voice-btn={i} aria-pressed={i === 0 ? 'true' : 'false'}>
+            <span class="voice__dot" aria-hidden="true" />
+            {t.name}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-voice]').forEach((root) => {
+    const btns = [...root.querySelectorAll<HTMLButtonElement>('[data-voice-btn]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-voice-panel]')];
+    btns.forEach((b, i) =>
+      b.addEventListener('click', () => {
+        btns.forEach((x, j) => x.setAttribute('aria-pressed', String(i === j)));
+        panels.forEach((p, j) => (p.hidden = i !== j));
+      }),
+    );
+  });
+</script>
+
+<style>
+  .voice__panel { position: relative; margin: 0; }
+
+  .voice__num {
+    position: absolute;
+    top: -0.2em;
+    right: 0;
+    color: transparent;
+    font-family: var(--f-serif);
+    font-size: clamp(6rem, 14vw, 12rem);
+    font-style: italic;
+    line-height: 0.8;
+    -webkit-text-stroke: 1px var(--c-gold-45);
+    pointer-events: none;
+  }
+
+  .voice__quote {
+    position: relative;
+    max-width: 22ch;
+    margin: 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: var(--fs-lead);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.04;
+  }
+
+  .voice__quote :global(.serif-em) { color: var(--c-gold); }
+  .voice__panel figcaption { margin-top: var(--s-4); color: var(--c-meta); }
+
+  .voice__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-5);
+    margin-top: var(--s-6);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--c-line);
+  }
+
+  .voice__tab {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--c-meta);
+    font-size: var(--fs-small);
+  }
+
+  .voice__tab:hover,
+  .voice__tab[aria-pressed="true"] { color: var(--c-ink); }
+
+  .voice__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--c-line-strong);
+    transition: background-color var(--t-med) ease, box-shadow var(--t-med) ease;
+  }
+
+  .voice__tab[aria-pressed="true"] .voice__dot { background: var(--c-gold); box-shadow: var(--shadow-dot-sm); }
+</style>

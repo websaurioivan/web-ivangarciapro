@@ -1,0 +1,42 @@
+# Compila la web en cada push a main y publica el resultado (dist/) en la rama `hostinger-deploy`.
+# Hostinger (hPanel → Avanzado → Git) se conecta a esa rama y la despliega en el dominio.
+# PUBLIC_STAGING: 'true' = dominio de pruebas (noindex + robots bloqueado). Cambiar a 'false' al pasar a producción.
+name: Build y despliegue
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PUBLIC_STAGING: 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+
+      - name: Publicar dist/ en la rama hostinger-deploy
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: hostinger-deploy
+          publish_dir: ./dist
+          force_orphan: true
+          commit_message: 'deploy: ${{ github.sha }}'

@@ -1,0 +1,82 @@
+{
+  "seo": {
+    "title": "Iván García · Diseño web con IA que impacta, vende y posiciona",
+    "description": "Aprende gratis a crear tu web con inteligencia artificial o pide un prototipo gratis en 24 horas. Webs rápidas, sin WordPress y preparadas para Google."
+  },
+  "hero": {
+    "titleStart": "Webs que",
+    "verbs": ["impactan", "venden", "posicionan"],
+    "subtitle": "Te enseño gratis a crear la tuya con IA. O, si lo prefieres, la hago yo por ti.",
+    "primary": { "label": "Aprender gratis", "href": "/recursos" },
+    "secondary": { "label": "Quiero que me la hagas", "href": "#servicio" },
+    "steps": [
+      { "label": "Impacta", "caption": "Un diseño único que se recuerda en tres segundos." },
+      { "label": "Vende", "caption": "Cada bloque empuja a una sola acción: que te contacten." },
+      { "label": "Posiciona", "caption": "Rápida y bien estructurada para que Google la entienda." }
+    ],
+    "frameUrl": "[tuproyecto].es",
+    "frameNote": "Ejemplo ilustrativo · [se sustituirá por un proyecto real]"
+  },
+  "ribbon": ["Diseño", "IA", "Google", "Negocio"],
+  "works": {
+    "title": "Webs reales, *resultados* reales",
+    "intro": "Proyectos diseñados y publicados. Qué necesitaba cada negocio y qué hicimos para conseguirlo.",
+    "link": { "label": "Ver cómo trabajo", "href": "/diseno-web" }
+  },
+  "learn": {
+    "title": "Créala tú, *gratis*",
+    "intro": "Tutoriales completos, prompts y checklists. Todo lo que uso para crear webs con IA, explicado paso a paso.",
+    "featured": {
+      "eyebrow": "Nuevo vídeo",
+      "title": "[Título del último vídeo del canal]",
+      "summary": "[Resumen en una frase: qué construyes y qué te llevas.]",
+      "youtubeId": "",
+      "duration": "[mm:ss]",
+      "href": "/recursos"
+    },
+    "allLink": { "label": "Ver todos los recursos", "href": "/recursos" },
+    "hosting": {
+      "text": "¿Ya tienes tu web? Ahora necesitas publicarla para que cualquiera pueda verla. Yo uso Hostinger, y esta web también vive ahí.",
+      "linkLabel": "Crear mi web con Hostinger",
+      "disclosure": "Enlace de afiliado: yo gano comisión, tú no pagas más."
+    }
+  },
+  "service": {
+    "title": "¿Prefieres que la haga *yo*?",
+    "intro": "Me cuentas tu negocio y en 24 horas tienes un prototipo de tu web. Si te gusta, la terminamos. Si no, no pagas nada.",
+    "compareTitle": "Sin WordPress. *Sin* mantenimiento.",
+    "compareIntro": "Tu web no depende de plugins ni de actualizaciones. Por eso no hay que mantenerla.",
+    "compare": [
+      { "yes": "Ningún plugin que actualizar ni que se rompa", "no": "Actualizaciones de plugins cada semana" },
+      { "yes": "Carga al instante, también en el móvil", "no": "Páginas lentas cargadas de complementos" },
+      { "yes": "Sin panel ni base de datos expuestos", "no": "Un panel y una base de datos que hay que proteger" },
+      { "yes": "Cambias tus textos tú, desde un panel sencillo", "no": "Llamar a un técnico para cada cambio" },
+      { "yes": "Pagas tu web, no licencias cada año", "no": "Licencias de temas y plugins que se renuevan" }
+    ],
+    "stepsTitle": "Así funciona",
+    "steps": [
+      { "title": "Pides tu prototipo", "text": "Un formulario de dos minutos: tu negocio y qué quieres conseguir." },
+      { "title": "Lo recibes en 24 horas", "text": "Tu página principal, navegable, en una dirección privada." },
+      { "title": "Si te gusta, la terminamos", "text": "Pago único, fraccionado o renting mensual. Tú eliges." }
+    ],
+    "cta": { "label": "Quiero mi prototipo gratis", "href": "/diseno-web#prototipo" },
+    "microcopy": "Sin compromiso · Respuesta en 24 h laborables",
+    "servicesLink": { "label": "Ver servicios y precios", "href": "/diseno-web" }
+  },
+  "testimonials": {
+    "title": "Lo que dicen *mis clientes*"
+  },
+  "about": {
+    "title": "Hola, soy *Iván*",
+    "text": "Creo webs con inteligencia artificial que impactan, venden y posicionan en Google. En YouTube enseño a hacerlo, paso a paso y gratis. [Una o dos frases reales sobre tu trayectoria.]",
+    "link": { "label": "Ver el canal de YouTube", "href": "[URL del canal]" },
+    "photoAlt": "Iván García en su espacio de trabajo"
+  },
+  "newsletter": {
+    "title": "Una web *mejor* cada semana",
+    "text": "Los prompts, herramientas y estrategias que utilizo para crear webs que impactan, venden y posicionan. Directo a tu email, gratis.",
+    "topics": ["Prompts", "Herramientas", "Diseño", "IA", "SEO", "Casos reales"],
+    "button": "Quiero recibirla",
+    "microcopy": "Gratis · Sin spam · Puedes salir cuando quieras."
+  }
+}

@@ -1,0 +1,51 @@
+---
+/**
+ * AffiliateLink · enlace de afiliado con tracking y marca de transparencia.
+ * El referido de Hostinger no admite subID: la atribución viaja en el evento affiliate_click.
+ * <AffiliateLink href={settings.hostingerUrl} sourceType="home" sourceSlug="home" placement="learn_hosting">Crear mi web con Hostinger</AffiliateLink>
+ */
+interface Props {
+  href: string;
+  partner?: string;
+  sourceType: 'home' | 'video' | 'guide' | 'resource';
+  sourceSlug: string;
+  placement: string;
+  videoId?: string;
+  campaign?: string;
+  class?: string;
+}
+const { href, partner = 'hostinger', sourceType, sourceSlug, placement, videoId = '', campaign = '', class: className } =
+  Astro.props;
+---
+
+<a
+  href={href}
+  class:list={['aff', className]}
+  rel="sponsored noopener"
+  target="_blank"
+  data-affiliate={partner}
+  data-source-type={sourceType}
+  data-source-slug={sourceSlug}
+  data-placement={placement}
+  data-video-id={videoId}
+  data-campaign={campaign}
+>
+  <span><slot /></span>
+  <span class="aff__arrow" aria-hidden="true">→</span>
+  <span class="visually-hidden">(enlace de afiliado, se abre en una pestaña nueva)</span>
+</a>
+
+<style>
+  .aff {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    min-height: 44px;
+    color: var(--c-gold);
+    font-size: var(--fs-small);
+    font-weight: 700;
+    transition: gap var(--t-fast) var(--ease), color var(--t-fast) ease;
+  }
+
+  .aff:hover { gap: 14px; color: var(--c-gold-light); }
+</style>

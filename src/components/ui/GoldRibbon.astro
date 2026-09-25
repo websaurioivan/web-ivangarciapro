@@ -1,0 +1,129 @@
+---
+/**
+ * GoldRibbon · cinta de oro del manual. UNA por página, inclinada −2°, en movimiento continuo.
+ * Incluye botón de pausa (WCAG 2.2.2) y se detiene con prefers-reduced-motion.
+ * <GoldRibbon words={['Diseño','IA','Google','Negocio']} />
+ */
+interface Props {
+  words: string[];
+  label?: string;
+}
+const { words, label = words.join(', ') } = Astro.props;
+const run = Array.from({ length: 4 }, () => words).flat();
+---
+
+<div class="ribbon" data-ribbon>
+  <p class="visually-hidden">{label}</p>
+  <div class="ribbon__band" aria-hidden="true">
+    <div class="ribbon__track">
+      {
+        [0, 1].map(() => (
+          <div class="ribbon__run">
+            {run.map((w) => (
+              <span class="ribbon__item">
+                {w}
+                <span class="ribbon__star">✦</span>
+              </span>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <button class="ribbon__toggle" type="button" aria-pressed="false" data-ribbon-toggle>
+    <span class="visually-hidden">Pausar la cinta en movimiento</span>
+    <svg class="ribbon__icon ribbon__icon--pause" viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="1.5" width="2.6" height="9" rx="0.6"></rect><rect x="7.4" y="1.5" width="2.6" height="9" rx="0.6"></rect></svg>
+    <svg class="ribbon__icon ribbon__icon--play" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.6v8.8L10.4 6z"></path></svg>
+  </button>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-ribbon]').forEach((ribbon) => {
+    const btn = ribbon.querySelector<HTMLButtonElement>('[data-ribbon-toggle]');
+    const label = btn?.querySelector('.visually-hidden');
+    btn?.addEventListener('click', () => {
+      const paused = btn.getAttribute('aria-pressed') !== 'true';
+      btn.setAttribute('aria-pressed', String(paused));
+      ribbon.toggleAttribute('data-paused', paused);
+      if (label) label.textContent = paused ? 'Reanudar la cinta en movimiento' : 'Pausar la cinta en movimiento';
+    });
+  });
+</script>
+
+<style>
+  .ribbon {
+    position: relative;
+    z-index: 2;
+    margin-block: var(--s-6);
+  }
+
+  .ribbon__band {
+    margin-inline: -4vw;
+    overflow: hidden;
+    background: var(--c-gold);
+    box-shadow: var(--shadow-ribbon);
+    transform: rotate(-2deg);
+  }
+
+  .ribbon__track {
+    display: flex;
+    width: max-content;
+    animation: ribbon var(--ribbon-duration) linear infinite;
+    will-change: transform;
+  }
+
+  .ribbon[data-paused] .ribbon__track { animation-play-state: paused; }
+
+  .ribbon__run { display: flex; }
+
+  .ribbon__item {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+    padding: 16px 14px;
+    color: var(--c-on-gold);
+    font-family: var(--f-display);
+    font-size: var(--fs-ribbon);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .ribbon__star {
+    font-family: var(--f-serif);
+    font-size: 1.1em;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .ribbon__toggle {
+    position: absolute;
+    right: var(--gutter);
+    bottom: -38px;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--c-line-strong);
+    border-radius: 50%;
+    background: var(--c-bg);
+    color: var(--c-meta);
+    transition: color var(--t-fast) ease, border-color var(--t-fast) ease;
+  }
+
+  .ribbon__toggle:hover { border-color: var(--c-gold-60); color: var(--c-ink); }
+
+  .ribbon__icon { width: 10px; height: 10px; fill: currentColor; }
+  .ribbon__icon--play { display: none; }
+  .ribbon[data-paused] .ribbon__icon--pause { display: none; }
+  .ribbon[data-paused] .ribbon__icon--play { display: block; }
+
+  @keyframes ribbon {
+    to { transform: translate3d(-50%, 0, 0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ribbon__track { animation: none; }
+    .ribbon__toggle { display: none; }
+  }
+</style>

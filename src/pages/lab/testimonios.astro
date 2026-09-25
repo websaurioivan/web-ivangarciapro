@@ -1,0 +1,88 @@
+---
+/**
+ * LAB · catálogo de diseños de testimonios (no indexable, fuera del sitemap).
+ * Todos usan los mismos datos (colección `testimonials` de Keystatic) → cambiar de diseño es cambiar el componente.
+ * Activo en la Home: Carousel.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Carousel from '../../components/testimonials/Carousel.astro';
+import Constellation from '../../components/testimonials/Constellation.astro';
+import SingleVoice from '../../components/testimonials/SingleVoice.astro';
+import BeforeAfter from '../../components/testimonials/BeforeAfter.astro';
+import Wall from '../../components/testimonials/Wall.astro';
+import MessageStack from '../../components/testimonials/MessageStack.astro';
+import { getTestimonials } from '../../lib/testimonials';
+import { getSettings } from '../../lib/site';
+
+const items = await getTestimonials();
+const { reviews } = await getSettings();
+
+const variants = [
+  { key: 'F', name: 'Carrusel', file: 'Carousel.astro', note: '3 tarjetas en escritorio, 1 con asomo en móvil. Avance automático cada 5 s que se para con ratón, toque, foco o pausa. Nota media real enlazada a Google.' },
+  { key: 'A', name: 'Constelación', file: 'Constellation.astro', note: 'Avatares flotando; al pasar o pulsar uno, su testimonio ocupa el centro. Muy visual; necesita fotos de clientes.' },
+  { key: 'B', name: 'Una sola voz', file: 'SingleVoice.astro', note: 'Un testimonio en grande como titular; nombres debajo con el punto de oro. Editorial; ideal junto al CTA del servicio.' },
+  { key: 'C', name: 'Antes / después', file: 'BeforeAfter.astro', note: 'Patrón ✓/✕ del manual: problema tachado → frase del cliente. El que más vende; ideal en /diseno-web.' },
+  { key: 'D', name: 'Muro en movimiento', file: 'Wall.astro', note: 'Dos filas de frases cortas deslizándose despacio. Transmite volumen; necesita 8+ testimonios.' },
+  { key: 'E', name: 'Mensajes reales', file: 'MessageStack.astro', note: 'Capturas reales de WhatsApp/email en tarjetas apiladas. La prueba más creíble.' },
+];
+const v = Object.fromEntries(variants.map((x) => [x.key, x]));
+---
+
+<BaseLayout title="Lab · Testimonios · Iván García" description="Catálogo interno de diseños de testimonios." pageType="lab" noindex>
+  <div class="container lab-intro">
+    <p class="mono">Laboratorio interno · no indexable</p>
+    <h1>Diseños de <em class="serif-em">testimonios</em></h1>
+    <p>Seis componentes en <code>src/components/testimonials/</code>. Todos leen los mismos testimonios de Keystatic: para cambiar de diseño basta con cambiar el componente en la página.</p>
+  </div>
+
+  <div class="container lab-label"><p class="mono">Versión F · Carrusel · <code>Carousel.astro</code> <span class="lab-active">Activo en la Home</span></p><p class="lab-note">{v.F!.note}</p></div>
+  <Carousel id="lab-f" title="Lo que dicen *mis clientes*" items={items} reviews={reviews} />
+
+  <div class="container lab-label"><p class="mono">Versión A · Constelación · <code>Constellation.astro</code></p><p class="lab-note">{v.A!.note}</p></div>
+  <Constellation id="lab-a" title="Lo que dicen *mis clientes*" items={items} />
+
+  <div class="container lab-label"><p class="mono">Versión B · Una sola voz · <code>SingleVoice.astro</code></p><p class="lab-note">{v.B!.note}</p></div>
+  <SingleVoice id="lab-b" title="Lo que dicen *mis clientes*" items={items} />
+
+  <div class="container lab-label"><p class="mono">Versión C · Antes / después · <code>BeforeAfter.astro</code></p><p class="lab-note">{v.C!.note}</p></div>
+  <BeforeAfter id="lab-c" title="Lo que *cambió*" items={items} />
+
+  <div class="container lab-label"><p class="mono">Versión D · Muro en movimiento · <code>Wall.astro</code></p><p class="lab-note">{v.D!.note}</p></div>
+  <Wall id="lab-d" title="Lo que dicen *de mí*" items={items} />
+
+  <div class="container lab-label"><p class="mono">Versión E · Mensajes reales · <code>MessageStack.astro</code></p><p class="lab-note">{v.E!.note}</p></div>
+  <MessageStack id="lab-e" title="Mensajes que *me llegan*" items={items} />
+</BaseLayout>
+
+<style>
+  .lab-intro { padding-block: var(--s-7) var(--s-5); }
+  .lab-intro > .mono { color: var(--c-gold); }
+
+  .lab-intro h1 {
+    margin-top: var(--s-3);
+    font-size: var(--fs-h2);
+    line-height: 0.94;
+    letter-spacing: -0.04em;
+  }
+
+  .lab-intro > p:last-child { max-width: 40rem; margin-top: var(--s-3); }
+
+  .lab-label {
+    margin-top: var(--s-8);
+    padding-top: var(--s-4);
+    border-top: 1px dashed var(--c-gold-28);
+  }
+
+  .lab-label .mono { color: var(--c-gold); }
+  .lab-note { max-width: 44rem; margin-top: var(--s-2); color: var(--c-meta); font-size: var(--fs-small); }
+
+  .lab-active {
+    margin-left: var(--s-2);
+    padding: 2px 10px;
+    border-radius: var(--r-full);
+    background: var(--c-gold);
+    color: var(--c-on-gold);
+  }
+
+  code { color: var(--c-ink); font-family: var(--f-mono); font-size: 0.9em; }
+</style>
