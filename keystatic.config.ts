@@ -34,7 +34,7 @@ export default config({
   ui: {
     brand: { name: 'Iván García' },
     navigation: {
-      Páginas: ['home', 'disenoWeb', 'settings'],
+      Páginas: ['home', 'disenoWeb', 'gift', 'settings'],
       Servicio: ['services', 'testimonials', 'cases'],
       Contenido: ['resources'],
     },
@@ -200,6 +200,28 @@ export default config({
           },
           { label: 'Newsletter' },
         ),
+      },
+    }),
+    gift: singleton({
+      label: 'Regalo flotante (newsletter)',
+      path: 'src/content/pages/gift',
+      format: { data: 'json' },
+      schema: {
+        enabled: fields.checkbox({ label: 'Activado', defaultValue: true }),
+        pill: fields.text({ label: 'Texto de la píldora flotante' }),
+        kicker: fields.text({ label: 'Antetítulo' }),
+        title: fields.text({ label: 'Título', description: emHint }),
+        text: fields.text({ label: 'Texto', multiline: true }),
+        items: fields.array(
+          fields.object({ n: fields.text({ label: 'Número' }), text: fields.text({ label: 'Qué recibes' }) }),
+          { label: 'Lista 3-2-1', itemLabel: (p) => `${p.fields.n.value} ${p.fields.text.value}` },
+        ),
+        giftText: fields.text({ label: 'Texto del regalo', description: emHint, multiline: true }),
+        leadMagnet: fields.text({ label: 'ID del regalo (para MailerLite y analítica)' }),
+        button: fields.text({ label: 'Botón' }),
+        microcopy: fields.text({ label: 'Microcopy' }),
+        success: fields.text({ label: 'Mensaje de éxito', multiline: true }),
+        dismissDays: fields.integer({ label: 'Días sin mostrar tras cerrarlo', defaultValue: 7 }),
       },
     }),
     disenoWeb: singleton({

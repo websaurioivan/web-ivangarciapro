@@ -9,6 +9,7 @@ import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import StickyCta from '../components/layout/StickyCta.astro';
 import Consent from '../components/layout/Consent.astro';
+import GiftPopup from '../components/layout/GiftPopup.astro';
 import { getSettings } from '../lib/site';
 
 interface Props {
@@ -18,8 +19,10 @@ interface Props {
   jsonLd?: object;
   noindex?: boolean;
   sticky?: { href: string; label: string; cta: string; intent: 'learn' | 'service' | 'newsletter' };
+  /** Píldora flotante «¿Quieres un regalo?» (newsletter). false en páginas de conversión de servicio. */
+  gift?: boolean;
 }
-const { title, description, pageType, jsonLd, noindex, sticky } = Astro.props;
+const { title, description, pageType, jsonLd, noindex, sticky, gift = true } = Astro.props;
 const settings = await getSettings();
 ---
 
@@ -45,6 +48,7 @@ const settings = await getSettings();
     </main>
     <Footer />
     {sticky && <StickyCta {...sticky} />}
+    {gift && <GiftPopup />}
     <script>
       import { initClickTracking } from '../lib/analytics';
       import { initStacks } from '../lib/stack';

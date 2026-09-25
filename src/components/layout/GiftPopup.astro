@@ -1,0 +1,518 @@
+---
+/**
+ * GiftPopup · píldora flotante «¿Quieres un regalo?» (abajo a la izquierda) que abre un panel de newsletter.
+ * - Nunca se abre sola (sin intersticiales). Aparece tras el primer scroll.
+ * - Se oculta: si el usuario la cierra (N días), si ya se suscribió, o mientras hay a la vista
+ *   una sección con [data-gift-hide] (p. ej. la newsletter de la Home).
+ * - Panel = <dialog> modal: foco atrapado, Esc cierra, devuelve el foco a la píldora.
+ * Contenido: src/content/pages/gift.json (Keystatic → «Regalo flotante»).
+ */
+import { getEntry } from 'astro:content';
+import { emph } from '../../lib/text';
+
+const gift = (await getEntry('gift', 'gift'))?.data;
+---
+
+{
+  gift?.enabled && (
+    <div class="gift" data-gift data-dismiss-days={String(gift.dismissDays)}>
+      <div class="gift__pill" data-gift-pill hidden>
+        <button
+          type="button"
+          class="gift__open"
+          aria-haspopup="dialog"
+          aria-controls="gift-dialog"
+          data-gift-open
+          data-cta="gift_pill_open"
+          data-placement="gift_pill"
+          data-intent="newsletter"
+        >
+          <svg class="gift__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3.5" y="8.5" width="17" height="4" rx="1" />
+            <path d="M5 12.5v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7M12 8.5v12M12 8.5c-1.2-2.8-4.8-4.2-5.8-2.2-.9 1.9 2.6 2.2 5.8 2.2Zm0 0c1.2-2.8 4.8-4.2 5.8-2.2.9 1.9-2.6 2.2-5.8 2.2Z" />
+          </svg>
+          {gift.pill}
+        </button>
+        <button type="button" class="gift__dismiss" data-gift-dismiss aria-label="Ocultar el regalo">
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="m3 3 6 6M9 3 3 9" /></svg>
+        </button>
+      </div>
+
+      <dialog class="gift__panel" id="gift-dialog" aria-labelledby="gift-title">
+        <button type="button" class="gift__close" data-gift-close aria-label="Cerrar">
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="m3 3 6 6M9 3 3 9" /></svg>
+        </button>
+        <p class="gift__kicker mono">{gift.kicker}</p>
+        <h2 id="gift-title" class="gift__title" set:html={emph(gift.title, 'gift__em')} />
+        <p class="gift__text">{gift.text}</p>
+        <ul role="list" class="gift__list">
+          {gift.items.map((it) => (
+            <li>
+              <span class="gift__num" aria-hidden="true">{it.n}</span>
+              <span>
+                <span class="visually-hidden">{it.n} </span>
+                {it.text}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p class="gift__bonus" set:html={emph(gift.giftText, 'gift__bonus-em')} />
+
+        <form class="gf" action="/api/newsletter.php" method="post" novalidate data-gift-form data-success={gift.success} data-lead={gift.leadMagnet}>
+          <div class="gf__row">
+            <div class="gf__field">
+              <label for="gf-name">Nombre</label>
+              <input id="gf-name" name="name" type="text" autocomplete="given-name" placeholder="Tu nombre" required maxlength="80" aria-describedby="gf-name-err" />
+              <p class="gf__err" id="gf-name-err" />
+            </div>
+            <div class="gf__field">
+              <label for="gf-email">Email</label>
+              <input id="gf-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" required maxlength="254" aria-describedby="gf-email-err" />
+              <p class="gf__err" id="gf-email-err" />
+            </div>
+          </div>
+          <div class="gf__field">
+            <label class="gf__check">
+              <input type="checkbox" name="privacy" value="1" required aria-describedby="gf-privacy-err" />
+              <span>
+                Acepto la <a href="/privacidad" target="_blank">política de privacidad</a>
+              </span>
+            </label>
+            <p class="gf__err" id="gf-privacy-err" />
+          </div>
+          <div class="gf__trap" aria-hidden="true">
+            <label for="gf-website">No rellenes este campo</label>
+            <input id="gf-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+          <input type="hidden" name="source" value="web" />
+          <input type="hidden" name="placement" value="gift_popup" />
+          <input type="hidden" name="lead_magnet" value={gift.leadMagnet} />
+          <input type="hidden" name="ts" value="" data-ts />
+          <button type="submit" class="gf__submit">{gift.button}</button>
+          <p class="gf__status" role="status" aria-live="polite" tabindex="-1" />
+          <p class="gf__micro">{gift.microcopy}</p>
+        </form>
+      </dialog>
+    </div>
+  )
+}
+
+<script>
+  import { track } from '../../lib/analytics';
+
+  const root = document.querySelector<HTMLElement>('[data-gift]');
+  if (root) {
+    const pill = root.querySelector<HTMLElement>('[data-gift-pill]')!;
+    const openBtn = root.querySelector<HTMLButtonElement>('[data-gift-open]')!;
+    const dialog = root.querySelector<HTMLDialogElement>('dialog')!;
+    const form = root.querySelector<HTMLFormElement>('[data-gift-form]')!;
+    const days = Number(root.dataset.dismissDays) || 7;
+    const store = {
+      get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } },
+      set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* sin almacenamiento */ } },
+    };
+
+    const dismissedAt = Number(store.get('ig-gift-dismissed') || 0);
+    const blocked = store.get('ig-subscribed') === '1' || Date.now() - dismissedAt < days * 864e5;
+
+    if (!blocked) {
+      let scrolled = false;
+      const hiders = new Set<Element>();
+      const update = () => {
+        const show = scrolled && hiders.size === 0;
+        pill.hidden = false;
+        pill.toggleAttribute('data-show', show);
+        pill.inert = !show;
+      };
+      const onScroll = () => {
+        if (scrollY > innerHeight * 0.6) {
+          scrolled = true;
+          update();
+          removeEventListener('scroll', onScroll);
+        }
+      };
+      addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => (e.isIntersecting ? hiders.add(e.target) : hiders.delete(e.target)));
+        update();
+      });
+      document.querySelectorAll('[data-gift-hide]').forEach((el) => io.observe(el));
+
+      root.querySelector('[data-gift-dismiss]')?.addEventListener('click', () => {
+        store.set('ig-gift-dismissed', String(Date.now()));
+        pill.removeAttribute('data-show');
+        pill.inert = true;
+      });
+    }
+
+    openBtn.addEventListener('click', () => {
+      dialog.showModal();
+      document.documentElement.style.overflow = 'hidden';
+      form.querySelector<HTMLInputElement>('[data-ts]')!.value = String(Date.now());
+    });
+    root.querySelector('[data-gift-close]')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+    dialog.addEventListener('close', () => {
+      document.documentElement.style.overflow = '';
+      openBtn.focus();
+    });
+
+    // ── Formulario ──
+    const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    const btn = form.querySelector<HTMLButtonElement>('.gf__submit')!;
+    const status = form.querySelector<HTMLElement>('.gf__status')!;
+    const label = btn.textContent ?? '';
+    const input = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
+    const rules: Record<string, () => string> = {
+      name: () => (input('name').value.trim().length < 2 ? 'Escribe tu nombre.' : ''),
+      email: () => {
+        const v = input('email').value.trim();
+        return !v ? 'Escribe tu email.' : EMAIL.test(v) ? '' : 'Revisa el email: debe tener @ y un dominio, como nombre@dominio.com.';
+      },
+      privacy: () => (input('privacy').checked ? '' : 'Acepta la política de privacidad para recibir tu regalo.'),
+    };
+    const check = (n: string) => {
+      const msg = rules[n]!();
+      document.getElementById(`gf-${n}-err`)!.textContent = msg;
+      input(n).setAttribute('aria-invalid', String(!!msg));
+      input(n).closest('.gf__field')?.toggleAttribute('data-error', !!msg);
+      return !msg;
+    };
+    Object.keys(rules).forEach((n) =>
+      input(n).addEventListener('change', () => input(n).closest('.gf__field')?.hasAttribute('data-error') && check(n)),
+    );
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const bad = Object.keys(rules).filter((n) => !check(n));
+      if (bad.length) {
+        form.dataset.state = 'error';
+        status.textContent = '';
+        input(bad[0]!).focus();
+        return;
+      }
+      form.dataset.state = 'loading';
+      btn.disabled = true;
+      btn.textContent = 'Enviando…';
+      try {
+        const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+        const d = (await res.json().catch(() => ({}))) as { ok?: boolean };
+        if (!res.ok || !d.ok) throw new Error();
+        form.dataset.state = 'ok';
+        status.textContent = form.dataset.success!;
+        status.focus();
+        store.set('ig-subscribed', '1');
+        pill.removeAttribute('data-show');
+        track('newsletter_signup', { form_id: 'gift', placement: 'gift_popup', lead_magnet: form.dataset.lead });
+      } catch {
+        form.dataset.state = 'error';
+        btn.disabled = false;
+        btn.textContent = label;
+        status.textContent = 'No se ha podido enviar. Inténtalo de nuevo en unos minutos o escríbeme a info@ivangarcia.pro.';
+      }
+    });
+  }
+</script>
+
+<style>
+  /* Píldora flotante */
+  .gift__pill {
+    position: fixed;
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    left: var(--gutter);
+    z-index: var(--z-sticky);
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity var(--t-med) ease, transform var(--t-med) var(--ease);
+    pointer-events: none;
+  }
+
+  .gift__pill[data-show] {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  @media (width >= 48rem) {
+    .gift__pill { bottom: var(--s-4); }
+  }
+
+  .gift__open {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    min-height: 52px;
+    padding: 0 22px 0 16px;
+    border: 1px solid var(--c-gold-28);
+    border-radius: var(--r-full);
+    background: var(--c-surface-2);
+    box-shadow: 0 18px 40px -18px var(--c-bg);
+    color: var(--c-ink);
+    font-size: var(--fs-small);
+    font-weight: 700;
+    transition: border-color var(--t-fast) ease, transform var(--t-fast) var(--ease);
+  }
+
+  .gift__open:hover { border-color: var(--c-gold-60); transform: translateY(-2px); }
+
+  .gift__icon {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: var(--c-gold);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+  }
+
+  .gift__dismiss {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--c-line-strong);
+    border-radius: 50%;
+    background: var(--c-bg);
+    color: var(--c-meta);
+  }
+
+  .gift__dismiss:hover { border-color: var(--c-gold-60); color: var(--c-ink); }
+
+  .gift__dismiss svg,
+  .gift__close svg {
+    width: 10px;
+    height: 10px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 1.6;
+  }
+
+  /* Panel */
+  .gift__panel {
+    position: fixed;
+    inset: auto auto 0 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: 92dvh;
+    margin: 0;
+    padding: var(--s-5) var(--s-4) max(var(--s-4), env(safe-area-inset-bottom));
+    overflow-y: auto;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    background: var(--c-surface);
+    color: var(--c-text);
+    overscroll-behavior: contain;
+  }
+
+  @media (width >= 40rem) {
+    .gift__panel {
+      bottom: var(--s-4);
+      left: var(--gutter);
+      width: 440px;
+      max-height: calc(100dvh - 2 * var(--s-4));
+      padding: var(--s-5);
+      border-radius: var(--r-lg);
+    }
+  }
+
+  .gift__panel[open] { animation: gift-in var(--t-slow) var(--ease); }
+  .gift__panel::backdrop { background: rgb(9 8 7 / 70%); }
+
+  @keyframes gift-in {
+    from { opacity: 0; transform: translateY(24px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gift__panel[open] { animation: none; }
+  }
+
+  .gift__close {
+    position: absolute;
+    top: var(--s-3);
+    right: var(--s-3);
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--c-line-strong);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--c-meta);
+  }
+
+  .gift__close:hover { border-color: var(--c-gold-60); color: var(--c-ink); }
+
+  .gift__kicker { padding-right: 48px; color: var(--c-meta); }
+
+  .gift__title {
+    margin-top: var(--s-3);
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+
+  .gift__title :global(.gift__em) {
+    background: var(--g-gold-text);
+    background-size: 220% 100%;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .gift__text { margin-top: var(--s-3); font-size: var(--fs-small); }
+
+  .gift__list { display: grid; gap: 10px; margin-top: var(--s-3); }
+
+  .gift__list li {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    color: var(--c-ink);
+    font-size: var(--fs-small);
+  }
+
+  .gift__num {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--c-gold-45);
+    border-radius: var(--r-sm);
+    color: var(--c-gold);
+    font-family: var(--f-mono);
+    font-size: var(--fs-mono);
+    font-weight: 500;
+  }
+
+  .gift__bonus {
+    margin-top: var(--s-4);
+    padding: var(--s-3) var(--s-4);
+    border: 1px solid var(--c-gold-28);
+    border-radius: var(--r-md);
+    background: var(--c-gold-06);
+    color: var(--c-ink);
+    font-size: var(--fs-small);
+  }
+
+  .gift__bonus :global(.gift__bonus-em) {
+    color: var(--c-gold);
+    font-family: var(--f-sans);
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  /* Formulario */
+  .gf { margin-top: var(--s-4); }
+  .gf__row { display: grid; gap: var(--s-3); }
+
+  @media (width >= 30rem) {
+    .gf__row { grid-template-columns: 1fr 1fr; }
+  }
+
+  .gf__field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .gf__row + .gf__field { margin-top: var(--s-3); }
+  .gf__field > label { color: var(--c-meta); font-size: var(--fs-micro); }
+
+  .gf input[type="text"],
+  .gf input[type="email"] {
+    width: 100%;
+    min-height: 50px;
+    padding: 0 14px;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-md);
+    background: var(--c-bg);
+    color: var(--c-ink);
+    font-size: 1rem;
+  }
+
+  .gf input::placeholder { color: var(--c-meta); }
+
+  .gf input:focus-visible {
+    border-color: var(--c-gold-60);
+    outline: 2px solid var(--c-gold);
+    outline-offset: 2px;
+  }
+
+  .gf__field[data-error] input { border-color: var(--c-error); }
+
+  .gf__check {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    min-height: 44px;
+    font-size: var(--fs-small);
+    cursor: pointer;
+  }
+
+  .gf__check input {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-sm);
+    background: var(--c-bg);
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .gf__check input:checked {
+    border-color: var(--c-gold);
+    background: var(--c-gold);
+    box-shadow: inset 0 0 0 3px var(--c-bg);
+  }
+
+  .gf__check a { color: var(--c-ink); text-decoration: underline; text-underline-offset: 3px; }
+  .gf__err { color: var(--c-error); font-size: var(--fs-micro); }
+  .gf__err:empty { display: none; }
+
+  .gf__trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .gf__submit {
+    width: 100%;
+    min-height: 56px;
+    margin-top: var(--s-4);
+    border: 0;
+    border-radius: var(--r-full);
+    background: var(--c-gold);
+    box-shadow: var(--shadow-cta);
+    color: var(--c-on-gold);
+    font-size: 1rem;
+    font-weight: 700;
+    transition: background-color var(--t-fast) ease;
+  }
+
+  .gf__submit:hover { background: var(--c-gold-hover); }
+
+  .gf__submit:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--c-surface), 0 0 0 4px var(--c-gold);
+  }
+
+  .gf__submit:disabled { cursor: progress; opacity: 0.7; }
+
+  .gf__status:empty { display: none; }
+  .gf__status { margin-top: var(--s-3); color: var(--c-ink); font-size: var(--fs-small); text-align: center; }
+  .gf__status:focus { outline: none; }
+  .gf[data-state="error"] .gf__status { color: var(--c-error); }
+  .gf[data-state="ok"] .gf__status::before { color: var(--c-gold); content: "✓ "; }
+  .gf[data-state="ok"] .gf__row,
+  .gf[data-state="ok"] .gf__field,
+  .gf[data-state="ok"] .gf__submit { display: none; }
+
+  .gf__micro { margin-top: var(--s-3); color: var(--c-meta); font-size: var(--fs-micro); text-align: center; }
+</style>

@@ -77,6 +77,24 @@ const home = defineCollection({
   }),
 });
 
+const gift = defineCollection({
+  loader: glob({ pattern: 'gift.json', base: './src/content/pages' }),
+  schema: z.object({
+    enabled: z.boolean(),
+    pill: z.string(),
+    kicker: z.string(),
+    title: z.string(),
+    text: z.string(),
+    items: z.array(z.object({ n: z.string(), text: z.string() })),
+    giftText: z.string(),
+    leadMagnet: z.string(),
+    button: z.string(),
+    microcopy: z.string(),
+    success: z.string(),
+    dismissDays: z.number().int().min(0),
+  }),
+});
+
 const section = z.object({ title: z.string(), intro: z.string() });
 
 const disenoWeb = defineCollection({
@@ -179,4 +197,4 @@ const resources = defineCollection({
   }),
 });
 
-export const collections = { settings, home, disenoWeb, services, testimonials, cases, resources };
+export const collections = { settings, home, disenoWeb, gift, services, testimonials, cases, resources };

@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "pill": "¿Quieres un regalo?",
+  "kicker": "Un regalo, sin letra pequeña",
+  "title": "Tu web en *3-2-1*",
+  "text": "La newsletter semanal para crear webs que impactan, venden y posicionan. Se lee en pocos minutos. Cada semana recibirás:",
+  "items": [
+    { "n": "3", "text": "ideas para mejorar tu web" },
+    { "n": "2", "text": "herramientas o prompts de IA que uso" },
+    { "n": "1", "text": "error que te está costando clientes" }
+  ],
+  "giftText": "Y al suscribirte, de regalo: *[Checklist SEO antes de publicar tu web]*.",
+  "leadMagnet": "checklist-seo",
+  "button": "Quiero mi regalo",
+  "microcopy": "Cada semana. Gratis. Te das de baja cuando quieras.",
+  "success": "Hecho. Revisa tu email y confirma la suscripción: ahí tienes tu regalo.",
+  "dismissDays": 7
+}

@@ -1,7 +1,7 @@
 <?php
 /**
  * POST /api/newsletter.php · alta en la newsletter (MailerLite, grupo «newsletter»).
- * Campos: email, source, placement, lead_magnet, website (honeypot), ts.
+ * Campos: email, name (opcional), source, placement, lead_magnet, website (honeypot), ts.
  * El doble opt-in se configura en MailerLite.
  */
 declare(strict_types=1);
@@ -25,6 +25,7 @@ if (!$email) {
 }
 
 $ok = ig_mailerlite_subscribe($CONFIG, $email, 'newsletter', [
+    'name' => ig_clean('name', 80),
     'source' => ig_clean('source', 60),
     'placement' => ig_clean('placement', 60),
     'lead_magnet' => ig_clean('lead_magnet', 80),
