@@ -1,6 +1,7 @@
 ---
 /**
- * Faq · preguntas frecuentes con <details> nativo (accesible sin JS). El JSON-LD FAQPage lo añade la página.
+ * Faq · preguntas frecuentes con <details> nativo (accesible sin JS). Acordeón exclusivo: abrir una cierra la anterior.
+ * El JSON-LD FAQPage lo añade la página.
  * <Faq title="Preguntas *frecuentes*" items={[{ q, a }]} />
  */
 import { emph } from '../../lib/text';
@@ -18,7 +19,7 @@ const { title, items } = Astro.props;
     <div class="faq__list">
       {
         items.map((it) => (
-          <details class="faq__item">
+          <details class="faq__item" name="faq">
             <summary>
               <span>{it.q}</span>
               <span class="faq__icon" aria-hidden="true">+</span>
@@ -30,6 +31,19 @@ const { title, items } = Astro.props;
     </div>
   </div>
 </section>
+
+<script>
+  // Acordeón exclusivo: solo una pregunta abierta. `name` ya lo hace de forma nativa;
+  // esto cubre navegadores que aún no lo soportan.
+  document.querySelectorAll<HTMLElement>('.faq__list').forEach((list) => {
+    const items = [...list.querySelectorAll<HTMLDetailsElement>('.faq__item')];
+    items.forEach((d) =>
+      d.addEventListener('toggle', () => {
+        if (d.open) items.forEach((o) => o !== d && o.open && (o.open = false));
+      }),
+    );
+  });
+</script>
 
 <style>
   .faq__grid { display: grid; gap: var(--s-6); }
