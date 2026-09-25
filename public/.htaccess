@@ -6,10 +6,11 @@ ErrorDocument 404 /404.html
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # HTTPS y sin www
-  RewriteCond %{HTTPS} off [OR]
-  RewriteCond %{HTTP_HOST} ^www\. [NC]
-  RewriteRule ^ https://ivangarcia.pro%{REQUEST_URI} [L,R=301]
+  # HTTPS y sin www (válido para el dominio de pruebas y el real)
+  RewriteCond %{HTTPS} off
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 
   # URLs limpias: /aviso-legal → aviso-legal.html
   RewriteCond %{REQUEST_FILENAME} !-f
