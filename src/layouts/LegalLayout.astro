@@ -4,7 +4,7 @@
  * <LegalLayout title="Aviso legal" description="…" updated="25/09/2026">…contenido…</LegalLayout>
  */
 import BaseLayout from './BaseLayout.astro';
-import { SITE_URL } from '../lib/site';
+import { SITE_URL, cleanPath } from '../lib/site';
 import { breadcrumbSchema, graph } from '../lib/seo';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
   updated: string;
 }
 const { title, description, updated } = Astro.props;
-const url = new URL(Astro.url.pathname, SITE_URL).href;
+const url = new URL(cleanPath(Astro.url.pathname), SITE_URL).href;
 ---
 
 <BaseLayout

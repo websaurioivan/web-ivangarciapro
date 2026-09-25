@@ -24,3 +24,6 @@ export const LEGAL_LINKS = [
   { label: 'Cookies', href: '/cookies' },
   { label: 'Afiliación', href: '/afiliacion' },
 ] as const;
+
+/** '/diseno-web.html' | '/index.html' | '/diseno-web/' → '/diseno-web' | '/' (build.format 'file') */
+export const cleanPath = (path: string) => path.replace(/(index)?\.html$/, '').replace(/\/$/, '') || '/';

@@ -5,9 +5,9 @@
  */
 import Logo from '../ui/Logo.astro';
 import Button from '../ui/Button.astro';
-import { NAV } from '../../lib/site';
+import { NAV, cleanPath } from '../../lib/site';
 
-const current = Astro.url.pathname;
+const current = cleanPath(Astro.url.pathname);
 ---
 
 <header class="header">

@@ -3,7 +3,7 @@
  * SeoHead · metas únicas, canonical, Open Graph, Twitter Card y JSON-LD.
  * <SeoHead title="…" description="…" jsonLd={graph(...)} />
  */
-import { SITE_URL } from '../../lib/site';
+import { SITE_URL, cleanPath } from '../../lib/site';
 
 interface Props {
   title: string;
@@ -26,20 +26,17 @@ const {
   jsonLd,
 } = Astro.props;
 
-const canonical = new URL(path.replace(/\/$/, '') || '/', SITE_URL).href;
+// Dominio de pruebas (PUBLIC_STAGING=true): nada indexable.
+const staging = import.meta.env.PUBLIC_STAGING === 'true';
+const robots = staging ? 'noindex, nofollow' : noindex ? 'noindex, follow' : '';
+const canonical = new URL(cleanPath(path), SITE_URL).href;
 const ogImage = new URL(image, SITE_URL).href;
 ---
 
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical} />
-{
-  import.meta.env.PUBLIC_STAGING === 'true' ? (
-    <meta name="robots" content="noindex, nofollow" />
-  ) : (
-    noindex && <meta name="robots" content="noindex, follow" />
-  )
-}}
+{robots && <meta name="robots" content={robots} />}
 
 <meta property="og:type" content={type} />
 <meta property="og:locale" content="es_ES" />
