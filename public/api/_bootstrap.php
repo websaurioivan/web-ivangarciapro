@@ -10,6 +10,8 @@ if (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === '_bootstrap.php') {
     exit;
 }
 
+header_remove('X-Powered-By');
+
 $configPath = dirname(__DIR__, 2) . '/ig-config.php';
 $CONFIG = is_file($configPath) ? require $configPath : [];
 

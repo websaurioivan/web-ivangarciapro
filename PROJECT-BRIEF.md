@@ -126,7 +126,7 @@ GOOGLE / YOUTUBE → WEB → SERVICIO → CLIENTE
 Web corporativa · Web de marca personal · Landing page.
 
 ### 6.2 Modalidades de pago (confirmado 2026-09-25)
-**Todas las modalidades incluyen lo mismo:** hosting, dominio y mantenimiento técnico durante **1 año** (en el renting: mientras dure el renting, *interpretación pendiente de confirmar*), panel para que el cliente edite su web y **entrega en 7 días** (desde la luz verde y la recepción de textos e imágenes).
+**Todas las modalidades incluyen lo mismo:** hosting, dominio y mantenimiento técnico durante **1 año** (en el renting: **durante todo el renting**, con la **misma cuota cada mes**; confirmado 2026-09-26), panel para que el cliente edite su web y **entrega en 7 días** (desde la luz verde y la recepción de textos e imágenes).
 1. **Pago único.**
 2. **Pago fraccionado:** en **3 meses, sin intereses**.
 3. **Renting mensual**:
@@ -138,7 +138,9 @@ Web corporativa · Web de marca personal · Landing page.
 
 **Servicios extra (precio a consultar):** cambios en la web · páginas adicionales · Google Ads · SEO local.
 
-**Prototipo:** entrega en 24 h para pedidos de lunes a jueves; pedidos de viernes a domingo → [lunes, pendiente de confirmar]. Máximo 10 por semana.
+**Prototipo:** entrega en 24 h para pedidos de lunes a jueves; pedidos de viernes, sábado y domingo → se entregan el **lunes** (confirmado 2026-09-26). Máximo 10 por semana.
+
+**Después del hosting incluido:** si el cliente quiere seguir, Iván le recomienda un hosting adecuado a su caso y le ayuda a migrar.
 
 **Formulario:** incluye **teléfono / WhatsApp** (obligatorio: convierte más).
 
