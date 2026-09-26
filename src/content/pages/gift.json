@@ -1,9 +1,9 @@
 {
-  "enabled": true,
+  "enabled": false,
   "pill": "¿Quieres un regalo?",
   "kicker": "Un regalo, sin letra pequeña",
   "title": "Tu web en *3-2-1*",
-  "text": "La newsletter semanal para crear webs que impactan, venden y posicionan. Se lee en pocos minutos. Cada semana recibirás:",
+  "text": "Un email a la semana con consejos, ideas y recomendaciones para que tu web impacte, convierta visitas en clientes, trabaje en automático y posicione en Google. Cada semana recibirás:",
   "items": [
     { "n": "3", "text": "ideas para mejorar tu web" },
     { "n": "2", "text": "herramientas o prompts de IA que uso" },

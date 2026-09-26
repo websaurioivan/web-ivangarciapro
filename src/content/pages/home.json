@@ -74,8 +74,8 @@
   },
   "newsletter": {
     "title": "Una web *mejor* cada semana",
-    "text": "Los prompts, herramientas y estrategias que utilizo para crear webs que impactan, venden y posicionan. Directo a tu email, gratis.",
-    "topics": ["Prompts", "Herramientas", "Diseño", "IA", "SEO", "Casos reales"],
+    "text": "Un email a la semana con consejos, ideas y recomendaciones para que tu web impacte, convierta visitas en clientes, trabaje en automático y posicione en Google.",
+    "topics": ["Diseño que impacta", "Visitas que se convierten en clientes", "Automatización", "Google y visibilidad"],
     "button": "Quiero recibirla",
     "microcopy": "Gratis · Sin spam · Puedes salir cuando quieras."
   }

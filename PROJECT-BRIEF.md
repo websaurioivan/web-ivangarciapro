@@ -66,7 +66,8 @@ Para quien no quiere hacerla: **«¿Prefieres que lo haga por ti?»**
 - **Decisión 2026-09-25:** la newsletter es **una sección de la Home**, no una landing propia (por ahora no existe `/newsletter`). El archivo `/newsletter/[slug]` queda aplazado.
 - No vender «recibir emails». Vender **el beneficio de pertenecer**.
 - **Concepto:** **Una web mejor cada semana.**
-- **Promesa:** ideas, herramientas, prompts y estrategias prácticas para crear webs que impactan, venden y posicionan.
+- **Promesa (2026-09-26):** un email a la semana con consejos, ideas y recomendaciones para tener una web **impactante**, que **convierte visitas en clientes**, **automatizada** y que **posiciona en Google** y genera visibilidad.
+- **Sin incentivo por ahora.** El regalo flotante («¿Quieres un regalo?», formato 3-2-1) está construido pero **desactivado** (`src/content/pages/gift.json` → `enabled: false`) hasta decidir el lead magnet.
 - **Frecuencia comunicada:** «cada semana». El día se define más adelante.
 - **Proveedor:** MailerLite.
 - Microcopy bajo el formulario: **Gratis · Sin spam · Puedes salir cuando quieras.**
