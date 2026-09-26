@@ -3,6 +3,9 @@
 Options -Indexes
 ErrorDocument 404 /404.html
 
+# /guias es a la vez guias.html y la carpeta guias/ (artículos): sin esto Apache añade «/» y da 403
+DirectorySlash Off
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
@@ -12,15 +15,15 @@ ErrorDocument 404 /404.html
   RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
   RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 
-  # URLs limpias: /aviso-legal → aviso-legal.html
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_FILENAME}.html -f
-  RewriteRule ^(.+?)/?$ $1.html [L]
-
-  # Sin barra final
-  RewriteCond %{REQUEST_FILENAME} !-d
+  # Sin barra final: /guias/ → /guias (también cuando existe una carpeta con ese nombre)
+  RewriteCond %{REQUEST_FILENAME} !-d [OR]
+  RewriteCond %{DOCUMENT_ROOT}/$1.html -f
   RewriteRule ^(.+)/$ /$1 [L,R=301]
+
+  # URLs limpias: /aviso-legal → aviso-legal.html, /guias → guias.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.+?)$ $1.html [L]
 </IfModule>
 
 # Compresión
