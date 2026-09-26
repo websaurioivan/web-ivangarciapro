@@ -1,0 +1,125 @@
+---
+/**
+ * VideoHero · vídeo de la guía con fachada ligera (miniatura; YouTube solo carga al pulsar, desde youtube-nocookie).
+ * Capítulos debajo: saltan al minuto exacto. Los botones {% moment %} del artículo también lo controlan.
+ * Sin ID de YouTube → hueco visible «[vídeo pendiente]».
+ */
+import Placeholder from '../ui/Placeholder.astro';
+import { toSeconds } from '../../lib/guides';
+
+interface Props {
+  youtubeId: string;
+  title: string;
+  chapters: { time: string; title: string }[];
+  slug: string;
+}
+const { youtubeId, title, chapters, slug } = Astro.props;
+---
+
+<figure class="vh">
+  {
+    youtubeId ? (
+      <div class="vh__media" data-video={youtubeId} data-video-title={title} data-slug={slug}>
+        <img src={`https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`} alt="" width="480" height="360" loading="lazy" decoding="async" />
+        <button type="button" class="vh__play" data-video-play aria-label={`Reproducir vídeo: ${title}`}>
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 1.8v8.4L10 6z" /></svg>
+        </button>
+      </div>
+    ) : (
+      <Placeholder label="Vídeo de YouTube de esta guía · añade el ID en Keystatic" ratio="16/9" />
+    )
+  }
+  <figcaption class="vh__cap">
+    <span class="mono">Vídeo</span>
+    {title}
+  </figcaption>
+  {
+    chapters.length > 0 && (
+      <ol role="list" class="vh__chapters" aria-label="Capítulos del vídeo">
+        {chapters.map((c) => (
+          <li>
+            <button type="button" data-video-seek={String(toSeconds(c.time))} disabled={!youtubeId}>
+              <span class="mono">{c.time}</span> {c.title}
+            </button>
+          </li>
+        ))}
+      </ol>
+    )
+  }
+</figure>
+
+<style>
+  .vh { margin: var(--s-6) 0; }
+
+  .vh__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: var(--c-surface);
+  }
+
+  .vh__media img { width: 100%; height: 100%; object-fit: cover; }
+  .vh__media :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+  .vh__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 80px;
+    height: 80px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--c-gold);
+    box-shadow: var(--shadow-cta);
+    transform: translate(-50%, -50%);
+    transition: transform var(--t-med) var(--ease);
+  }
+
+  .vh__play:hover { transform: translate(-50%, -50%) scale(1.08); }
+  .vh__play svg { width: 24px; height: 24px; margin-left: 4px; fill: var(--c-on-gold); }
+
+  .vh__cap {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    margin-top: var(--s-2);
+    color: var(--c-ink);
+    font-size: var(--fs-small);
+  }
+
+  .vh__cap .mono { color: var(--c-gold); }
+
+  .vh__chapters {
+    display: grid;
+    gap: 2px;
+    margin-top: var(--s-3);
+    border-top: 1px solid var(--c-line);
+  }
+
+  @media (width >= 48rem) {
+    .vh__chapters { grid-template-columns: 1fr 1fr; column-gap: var(--s-5); }
+  }
+
+  .vh__chapters button {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 0;
+    border: 0;
+    border-bottom: 1px solid var(--c-line);
+    background: none;
+    color: var(--c-text);
+    font-size: var(--fs-small);
+    text-align: left;
+  }
+
+  .vh__chapters button:not(:disabled):hover { color: var(--c-ink); }
+  .vh__chapters button:disabled { cursor: default; }
+  .vh__chapters .mono { color: var(--c-gold); }
+</style>

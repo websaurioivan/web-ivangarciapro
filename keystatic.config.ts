@@ -5,6 +5,7 @@
  * Los esquemas deben coincidir con src/content.config.ts.
  */
 import { config, fields, collection, singleton } from '@keystatic/core';
+import { block, wrapper } from '@keystatic/core/content-components';
 
 const cta = (label: string) =>
   fields.object(
@@ -36,6 +37,7 @@ export default config({
     navigation: {
       Páginas: ['home', 'disenoWeb', 'gift', 'settings'],
       Servicio: ['services', 'testimonials', 'cases'],
+      Guías: ['guides', 'topics'],
       Contenido: ['resources'],
     },
   },
@@ -303,6 +305,114 @@ export default config({
     }),
   },
   collections: {
+    guides: collection({
+      label: 'Guías',
+      path: 'src/content/guides/*',
+      slugField: 'title',
+      format: { contentField: 'content' },
+      entryLayout: 'content',
+      columns: ['topic', 'publishedAt'],
+      schema: {
+        title: fields.slug({
+          name: { label: 'Título (H1)' },
+          slug: { label: 'URL', description: 'Corta y con la palabra clave: como-crear-una-web-con-ia' },
+        }),
+        seoTitle: fields.text({ label: 'Title SEO (opcional)', description: 'Si lo dejas vacío se usa el título. Ideal: 50–60 caracteres.' }),
+        description: fields.text({
+          label: 'Meta description',
+          multiline: true,
+          validation: { length: { min: 70, max: 160 } },
+          description: '70–160 caracteres. Es lo que se ve en Google.',
+        }),
+        excerpt: fields.text({ label: 'Entradilla (bajo el H1)', multiline: true }),
+        topic: fields.relationship({ label: 'Tema', collection: 'topics', validation: { isRequired: true } }),
+        pillar: fields.checkbox({ label: 'Guía pilar del tema', defaultValue: false }),
+        keyword: fields.text({ label: 'Palabra clave principal' }),
+        publishedAt: fields.date({ label: 'Fecha de publicación', defaultValue: { kind: 'today' }, validation: { isRequired: true } }),
+        updatedAt: fields.date({ label: 'Última actualización (opcional)' }),
+        draft: fields.checkbox({ label: 'Borrador (no se publica)', defaultValue: false }),
+        example: fields.checkbox({ label: 'Artículo de ejemplo (muestra aviso)', defaultValue: false }),
+        youtubeId: fields.text({ label: 'ID del vídeo de YouTube (opcional)', description: 'Lo que va tras v= en la URL del vídeo' }),
+        videoTitle: fields.text({ label: 'Título del vídeo' }),
+        chapters: fields.array(
+          fields.object({ time: fields.text({ label: 'Minuto (ej. 3:20)' }), title: fields.text({ label: 'Capítulo' }) }),
+          { label: 'Capítulos del vídeo', itemLabel: (p) => `${p.fields.time.value} · ${p.fields.title.value}` },
+        ),
+        tldr: fields.array(fields.text({ label: 'Punto' }), { label: 'En 30 segundos (3–5 puntos)', itemLabel: (p) => p.value }),
+        related: fields.array(fields.relationship({ label: 'Guía', collection: 'guides' }), {
+          label: 'Guías relacionadas (si lo dejas vacío, se eligen del mismo tema)',
+          itemLabel: (p) => p.value ?? 'Guía',
+        }),
+        faq: fields.array(
+          fields.object({ q: fields.text({ label: 'Pregunta' }), a: fields.text({ label: 'Respuesta', multiline: true }) }),
+          { label: 'Preguntas frecuentes', itemLabel: (p) => p.fields.q.value },
+        ),
+        content: fields.markdoc({
+          label: 'Contenido',
+          extension: 'mdoc',
+          options: { image: { directory: 'public/guias', publicPath: '/guias/' } },
+          components: {
+            callout: wrapper({
+              label: 'Aviso',
+              schema: {
+                type: fields.select({
+                  label: 'Tipo',
+                  options: [
+                    { label: 'Consejo ✓', value: 'tip' },
+                    { label: 'Atención !', value: 'warning' },
+                    { label: 'Error típico ✕', value: 'error' },
+                  ],
+                  defaultValue: 'tip',
+                }),
+                title: fields.text({ label: 'Título (opcional)' }),
+              },
+            }),
+            prompt: wrapper({
+              label: 'Prompt (con botón Copiar)',
+              schema: { title: fields.text({ label: 'Título', defaultValue: 'Prompt' }) },
+            }),
+            steps: wrapper({ label: 'Pasos numerados (mete dentro una lista numerada)', schema: {} }),
+            tool: block({
+              label: 'Herramienta',
+              schema: {
+                name: fields.text({ label: 'Nombre' }),
+                url: fields.text({ label: 'Enlace' }),
+                description: fields.text({ label: 'Para qué la uso', multiline: true }),
+                affiliate: fields.checkbox({ label: 'Es enlace de afiliado', defaultValue: false }),
+                cta: fields.text({ label: 'Texto del enlace', defaultValue: 'Ver herramienta' }),
+              },
+            }),
+            moment: block({
+              label: 'Ver este paso en el vídeo',
+              schema: {
+                time: fields.text({ label: 'Minuto (ej. 3:20)' }),
+                label: fields.text({ label: 'Texto del botón', defaultValue: 'Ver este paso en el vídeo' }),
+              },
+            }),
+            newsletter: block({
+              label: 'CTA newsletter',
+              schema: {
+                title: fields.text({ label: 'Título (opcional)', description: emHint }),
+                text: fields.text({ label: 'Texto adaptado al artículo (opcional)', multiline: true }),
+              },
+            }),
+          },
+        }),
+      },
+    }),
+    topics: collection({
+      label: 'Temas de guías',
+      path: 'src/content/topics/*',
+      slugField: 'name',
+      format: { data: 'yaml' },
+      schema: {
+        name: fields.slug({ name: { label: 'Nombre corto' }, slug: { label: 'URL del tema' } }),
+        title: fields.text({ label: 'Título del hub (H1)', description: emHint }),
+        description: fields.text({ label: 'Meta description', multiline: true }),
+        intro: fields.text({ label: 'Intro del hub', multiline: true }),
+        order: fields.integer({ label: 'Orden', defaultValue: 1 }),
+      },
+    }),
     services: collection({
       label: 'Servicios',
       path: 'src/content/services/*',

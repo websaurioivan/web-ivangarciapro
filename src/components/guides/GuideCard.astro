@@ -1,0 +1,100 @@
+---
+/**
+ * GuideCard · tarjeta de guía para hubs. `size="lead"` para la guía pilar destacada.
+ */
+import { readingTime, formatDate, type Guide } from '../../lib/guides';
+import { emph } from '../../lib/text';
+
+interface Props {
+  guide: Guide;
+  topicName?: string | undefined;
+  size?: 'default' | 'lead';
+  headingLevel?: 'h2' | 'h3';
+}
+const { guide, topicName = '', size = 'default', headingLevel = 'h3' } = Astro.props;
+const d = guide.data;
+const Tag = headingLevel;
+const date = d.updatedAt ?? d.publishedAt;
+---
+
+<article class:list={['gc', `gc--${size}`]}>
+  <p class="gc__meta mono">
+    {topicName && <span>{topicName}</span>}
+    {d.pillar && <span class="gc__pillar">Guía pilar</span>}
+    {d.youtubeId && <span>Con vídeo</span>}
+  </p>
+  <Tag class="gc__title">
+    <a href={`/guias/${guide.id}`} set:html={emph(d.title)} />
+  </Tag>
+  <p class="gc__excerpt">{d.excerpt}</p>
+  <p class="gc__foot mono">
+    <span>{readingTime(guide)} min de lectura</span>
+    <span aria-hidden="true">·</span>
+    <time datetime={date.toISOString()}>{formatDate(date)}</time>
+  </p>
+</article>
+
+<style>
+  .gc {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+    height: 100%;
+    padding: var(--s-5) var(--s-4);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: var(--c-surface);
+    transition: border-color var(--t-med) ease, transform var(--t-med) var(--ease);
+  }
+
+  .gc:hover { border-color: var(--c-gold-45); transform: translateY(-4px); }
+
+  .gc--lead { padding: var(--s-6) var(--s-5); border-color: var(--c-gold-28); }
+
+  .gc__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    color: var(--c-meta);
+  }
+
+  .gc__pillar { color: var(--c-gold); }
+
+  .gc__title {
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+  }
+
+  .gc--lead .gc__title {
+    font-size: clamp(2rem, 3.6vw, 3rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+
+  .gc__title a { color: var(--c-ink); }
+  .gc__title a:hover { color: var(--c-ink); }
+
+  /* Toda la tarjeta clicable sin anidar enlaces */
+  .gc__title a::after {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--r-lg);
+    content: "";
+  }
+
+  .gc__title a:focus-visible { outline: none; }
+  .gc:has(a:focus-visible) { outline: 2px solid var(--c-gold); outline-offset: 3px; }
+
+  .gc__excerpt { flex: 1; font-size: var(--fs-small); }
+  .gc--lead .gc__excerpt { max-width: 40rem; font-size: var(--fs-body-lg); }
+
+  .gc__foot {
+    display: flex;
+    gap: 8px;
+    color: var(--c-meta);
+  }
+</style>

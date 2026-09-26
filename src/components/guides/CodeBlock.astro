@@ -1,0 +1,76 @@
+---
+/**
+ * CodeBlock (Markdoc `fence`) · código con resaltado «Oro» generado al compilar (0 KB de JS) y botón Copiar.
+ * En el editor: bloque de código con lenguaje (html, css, js, bash, json, php…).
+ */
+import { Code } from 'astro:components';
+import { oroTheme } from '../../lib/code-theme';
+
+interface Props {
+  content: string;
+  language?: string;
+}
+const { content, language = 'plaintext' } = Astro.props;
+const langLabel: Record<string, string> = {
+  html: 'HTML', css: 'CSS', js: 'JavaScript', javascript: 'JavaScript', ts: 'TypeScript', bash: 'Terminal', sh: 'Terminal',
+  json: 'JSON', php: 'PHP', apache: '.htaccess', txt: 'Texto', plaintext: 'Texto', md: 'Markdown', yaml: 'YAML',
+};
+const code = content.replace(/\n$/, '');
+---
+
+<div class="cb" data-copy-block>
+  <div class="cb__bar">
+    <span class="cb__lang mono">{langLabel[language] ?? language}</span>
+    <button type="button" class="cb__copy" data-copy-code>
+      <span data-copy-label>Copiar</span>
+    </button>
+  </div>
+  <Code code={code} lang={language as any} theme={oroTheme as any} wrap={false} />
+</div>
+
+<style>
+  .cb {
+    margin-block: var(--s-5);
+    overflow: hidden;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-md);
+    background: var(--c-surface-2);
+  }
+
+  .cb__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 6px 6px 16px;
+    border-bottom: 1px solid var(--c-line);
+  }
+
+  .cb__lang { color: var(--c-meta); }
+
+  .cb__copy {
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-full);
+    background: transparent;
+    color: var(--c-ink);
+    font-size: var(--fs-micro);
+    font-weight: 500;
+    transition: border-color var(--t-fast) ease, color var(--t-fast) ease;
+  }
+
+  .cb__copy:hover { border-color: var(--c-gold-60); color: var(--c-gold); }
+  .cb__copy[data-done] { border-color: var(--c-gold); color: var(--c-gold); }
+
+  .cb :global(pre) {
+    margin: 0;
+    padding: var(--s-3) var(--s-4);
+    overflow-x: auto;
+    font-family: var(--f-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+    tab-size: 2;
+  }
+
+  .cb :global(pre:focus-visible) { outline: 2px solid var(--c-gold); outline-offset: -2px; }
+</style>

@@ -256,3 +256,14 @@ npm run check      # astro check + tipos
 npm run build      # build estático público
 npm run preview    # servir dist/
 ```
+
+---
+
+## 13. Guías (blog)
+
+- Contenido: `src/content/guides/*.mdoc` (Markdoc) + temas en `src/content/topics/*.yaml`. Se editan en Keystatic → **Guías**.
+- Bloques del cuerpo (definidos en `markdoc.config.mjs` **y** en `keystatic.config.ts`): código con resaltado «Oro» y Copiar (`src/lib/code-theme.ts`), `prompt`, `callout`, `steps`, `tool` (afiliado con aviso y tracking), `moment` (salta al minuto del vídeo), `newsletter`.
+- Plantilla: `src/pages/guias/[slug].astro`. Hubs: `src/pages/guias/index.astro` y `src/pages/guias/tema/[topic].astro`. RSS: `/guias/rss.xml`.
+- Publicación: `draft` y `publishedAt` futura no se publican (sí se ven en `npm run dev`). `example: true` muestra el aviso de artículo de ejemplo.
+- Datos estructurados: Article, VideoObject (+ Clip por capítulo), FAQPage, BreadcrumbList.
+- Newsletter: bloque `{% newsletter /%}` dentro del texto + uno fijo al final; el origen (URL) viaja en el campo `source` a MailerLite.

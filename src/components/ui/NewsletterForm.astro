@@ -68,6 +68,9 @@ const { id, placement, button, microcopy, leadMagnet = '', source = 'web' } = As
     const ts = form.querySelector<HTMLInputElement>('[data-ts]');
     const label = btn.textContent ?? '';
     if (ts) ts.value = String(Date.now());
+    // Origen exacto (p. ej. «guide:/guias/como-crear-una-pagina-web-con-ia») para saber qué contenido capta más
+    const source = form.querySelector<HTMLInputElement>('input[name="source"]');
+    if (source && !source.value.includes(':')) source.value = `${source.value}:${location.pathname}`;
 
     const setState = (state: 'idle' | 'error' | 'loading' | 'ok', text = '') => {
       form.dataset.state = state;

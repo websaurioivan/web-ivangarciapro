@@ -277,6 +277,7 @@ GTM + GA4 con Consent Mode v2. Eventos: `cta_click`, `affiliate_click`, `newslet
 | 2026-09-25 | Cinta de oro lenta (90 s por vuelta). Tarjetas apiladas al hacer scroll en Trabajos y Servicios |
 | 2026-09-25 | Testimonios: **carrusel** en la Home (después del bloque de servicio). Las otras 5 versiones quedan como componentes en `src/components/testimonials/` (catálogo en `/lab/testimonios`) |
 | 2026-09-25 | `/diseno-web` construida: hero + línea de tiempo, trabajos, miedos resueltos, 4 pasos, servicios, tabla de modalidades, sin WordPress, testimonios antes/después, FAQ y formulario (con lista de espera) |
+| 2026-09-26 | **Guías** construidas: hub /guias, 5 temas (/guias/tema/*), plantilla de artículo (índice, «En 30 segundos», vídeo con capítulos, código y prompts con Copiar, avisos, pasos, herramientas, FAQ, autor, relacionadas) y 10 artículos de ejemplo. CTA de newsletter en el contenido y al final de cada guía |
 | 2026-09-25 | Movimiento: se respeta `prefers-reduced-motion` al 100 % (opción A) |
 | 2026-09-25 | Prototipos limitados a **10 por semana**, con contador real y lista de espera |
 | 2026-09-25 | Argumento diferencial: sin WordPress → sin mantenimiento |

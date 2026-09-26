@@ -1,0 +1,66 @@
+---
+/**
+ * NewsletterInline · captación de newsletter DENTRO del contenido (sin popups).
+ * En el cuerpo: {% newsletter title="…" text="…" /%} (opcional). Al final de cada guía se añade siempre uno.
+ * El origen (URL de la guía) se envía en el campo `source` para saber qué contenido capta más.
+ */
+import NewsletterForm from '../ui/NewsletterForm.astro';
+import { emph } from '../../lib/text';
+
+interface Props {
+  title?: string;
+  text?: string;
+  placement?: string;
+}
+const {
+  title = 'Una web *mejor* cada semana',
+  text = 'Cada semana comparto consejos, ideas y recomendaciones para que tu web impacte, convierta visitas en clientes, trabaje en automático y posicione en Google.',
+  placement = 'guide_inline',
+} = Astro.props;
+const id = `nl-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<aside class="nli" aria-label="Suscríbete a la newsletter" data-gift-hide>
+  <div class="nli__glow" aria-hidden="true"></div>
+  <p class="nli__title" set:html={emph(title || 'Una web *mejor* cada semana', 'nli__em')} />
+  <p class="nli__text">{text}</p>
+  <NewsletterForm id={id} placement={placement} button="Quiero recibirla" microcopy="Gratis · Sin spam · Puedes salir cuando quieras." source="guide" />
+</aside>
+
+<style>
+  .nli {
+    position: relative;
+    margin-block: var(--s-6);
+    padding: var(--s-5);
+    overflow: hidden;
+    border: 1px solid var(--c-gold-28);
+    border-radius: var(--r-lg);
+    background: var(--c-surface);
+  }
+
+  .nli__glow {
+    position: absolute;
+    bottom: -220px;
+    left: -160px;
+    width: 460px;
+    height: 460px;
+    border-radius: 50%;
+    background: var(--g-glow);
+    opacity: 0.22;
+    pointer-events: none;
+  }
+
+  .nli > :not(.nli__glow) { position: relative; }
+
+  .nli__title {
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+
+  .nli__title :global(.nli__em) { color: var(--c-gold); }
+  .nli__text { max-width: 34rem; margin-block: var(--s-3) var(--s-4); font-size: var(--fs-small); }
+</style>

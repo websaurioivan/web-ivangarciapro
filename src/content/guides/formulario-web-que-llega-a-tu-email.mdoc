@@ -1,0 +1,35 @@
+---
+title: Un formulario web que *llega a tu email*
+description: Cómo hacer que el formulario de tu web envíe cada contacto a tu email de forma fiable, con protección antispam y confirmación al cliente.
+excerpt: El formulario es la puerta de entrada de tus clientes. Así te aseguras de que ningún contacto se pierde por el camino.
+topic: automatizacion
+keyword: formulario web a email
+publishedAt: 2026-09-17
+example: true
+tldr:
+  - Pide solo los datos imprescindibles.
+  - Protege el formulario del spam sin molestar al cliente.
+  - Confirma siempre el envío y di qué pasa después.
+---
+Un formulario que no llega es un cliente perdido. Estas son las claves para que funcione siempre.
+
+## Menos campos, más contactos
+
+Cada campo extra es una excusa para no enviarlo. Pide solo lo que necesitas para responder: nombre, forma de contacto y qué necesita.
+
+## Antispam sin molestar
+
+Una técnica sencilla es el **honeypot**: un campo oculto que las personas no ven, pero los robots rellenan. Si llega relleno, se descarta.
+
+```html
+<div style="position:absolute;left:-9999px" aria-hidden="true">
+  <label for="website">No rellenes este campo</label>
+  <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+</div>
+```
+
+{% callout type="error" title="Formularios que no confirman" %}
+Si al enviar no pasa nada visible, el cliente no sabe si ha funcionado y lo vuelve a intentar o se va. Muestra siempre un mensaje claro de éxito.
+{% /callout %}
+
+{% newsletter /%}

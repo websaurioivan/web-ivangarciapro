@@ -1,0 +1,82 @@
+---
+/**
+ * PromptBlock (Markdoc) · el formato estrella: tarjeta de prompt con «Copiar prompt».
+ * {% prompt title="Prompt · estructura de la home" %}Texto del prompt…{% /prompt %}
+ * Copia el texto plano del contenido (respeta los saltos de línea).
+ */
+interface Props {
+  title?: string;
+}
+const { title = 'Prompt' } = Astro.props;
+---
+
+<figure class="pr" data-copy-block>
+  <figcaption class="pr__bar">
+    <span class="pr__title mono"><span class="pr__dot" aria-hidden="true"></span>{title}</span>
+    <button type="button" class="pr__copy" data-copy-prompt>
+      <span data-copy-label>Copiar prompt</span>
+    </button>
+  </figcaption>
+  <div class="pr__body" data-copy-source><slot /></div>
+</figure>
+
+<style>
+  .pr {
+    margin: var(--s-5) 0;
+    overflow: hidden;
+    border: 1px solid var(--c-gold-28);
+    border-radius: var(--r-md);
+    background: var(--c-surface-2);
+  }
+
+  .pr__bar {
+    display: flex;
+    gap: var(--s-3);
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 6px 6px 16px;
+    border-bottom: 1px solid var(--c-line);
+  }
+
+  .pr__title {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    color: var(--c-ink);
+  }
+
+  .pr__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--c-gold);
+    box-shadow: var(--shadow-dot-sm);
+  }
+
+  .pr__copy {
+    flex: none;
+    min-height: 36px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: var(--r-full);
+    background: var(--c-gold);
+    color: var(--c-on-gold);
+    font-size: var(--fs-micro);
+    font-weight: 700;
+    transition: background-color var(--t-fast) ease;
+  }
+
+  .pr__copy:hover { background: var(--c-gold-hover); }
+
+  .pr__body {
+    padding: var(--s-4);
+    color: var(--c-ink);
+    font-family: var(--f-mono);
+    font-size: 0.875rem;
+    line-height: 1.75;
+    white-space: pre-wrap;
+  }
+
+  .pr__body :global(p) { margin: 0; }
+  .pr__body :global(p + p) { margin-top: var(--s-3); }
+</style>

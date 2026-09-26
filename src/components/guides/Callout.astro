@@ -1,0 +1,64 @@
+---
+/**
+ * Callout (Markdoc) · aviso dentro del artículo. Patrón ✓/✕ del manual.
+ * {% callout type="tip|warning|error" title="…" %}texto{% /callout %}
+ */
+interface Props {
+  type?: 'tip' | 'warning' | 'error';
+  title?: string;
+}
+const { type = 'tip', title = '' } = Astro.props;
+const meta = {
+  tip: { icon: '✓', label: 'Consejo' },
+  warning: { icon: '!', label: 'Atención' },
+  error: { icon: '✕', label: 'Error típico' },
+}[type];
+---
+
+<aside class:list={['co', `co--${type}`]} aria-label={title || meta.label}>
+  <span class="co__icon" aria-hidden="true">{meta.icon}</span>
+  <div class="co__body">
+    <p class="co__title">{title || meta.label}</p>
+    <div class="co__text"><slot /></div>
+  </div>
+</aside>
+
+<style>
+  .co {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--s-3);
+    margin-block: var(--s-5);
+    padding: var(--s-4);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-md);
+    background: var(--c-surface);
+  }
+
+  .co--tip { border-color: var(--c-gold-28); background: var(--c-gold-06); }
+  .co--error { border-color: var(--c-line-strong); }
+
+  .co__icon {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--c-gold-45);
+    border-radius: 50%;
+    color: var(--c-gold);
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  .co--error .co__icon { border-color: var(--c-error); color: var(--c-error); }
+
+  .co__title {
+    color: var(--c-ink);
+    font-size: var(--fs-small);
+    font-weight: 700;
+  }
+
+  .co__text { margin-top: 4px; font-size: var(--fs-small); }
+  .co__text :global(p) { margin: 0; }
+  .co__text :global(p + p) { margin-top: var(--s-2); }
+</style>

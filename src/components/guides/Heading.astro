@@ -1,0 +1,61 @@
+---
+/**
+ * Heading (Markdoc) · H2/H3 del artículo con id (lo genera @astrojs/markdoc) y botón «copiar enlace a esta sección».
+ */
+interface Props {
+  level: number;
+  id: string;
+}
+const { level, id } = Astro.props;
+const Tag = `h${Math.min(Math.max(level, 2), 4)}` as 'h2' | 'h3' | 'h4';
+---
+
+<Tag id={id} class="gh">
+  <slot />
+  {
+    level <= 3 && (
+      <button type="button" class="gh__anchor" data-copy-link={id} aria-label="Copiar enlace a esta sección">
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M6.5 9.5a3 3 0 0 0 4.2 0l2.1-2.1a3 3 0 0 0-4.2-4.2l-.8.8M9.5 6.5a3 3 0 0 0-4.2 0L3.2 8.6a3 3 0 0 0 4.2 4.2l.8-.8" />
+        </svg>
+      </button>
+    )
+  }
+</Tag>
+
+<style>
+  .gh { position: relative; scroll-margin-top: var(--s-8); }
+
+  .gh__anchor {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    margin-left: 8px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--c-meta);
+    vertical-align: middle;
+    opacity: 0;
+    transition: opacity var(--t-fast) ease, color var(--t-fast) ease, border-color var(--t-fast) ease;
+  }
+
+  .gh:hover .gh__anchor,
+  .gh__anchor:focus-visible { opacity: 1; }
+  .gh__anchor:hover { border-color: var(--c-gold-45); color: var(--c-gold); }
+
+  .gh__anchor svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 1.6;
+  }
+
+  @media (hover: none) {
+    .gh__anchor { display: none; }
+  }
+</style>

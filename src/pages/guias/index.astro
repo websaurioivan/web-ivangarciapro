@@ -1,0 +1,169 @@
+---
+/**
+ * /guias · hub principal: guía pilar destacada, navegación por temas y últimas guías de cada tema.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GuideCard from '../../components/guides/GuideCard.astro';
+import NewsletterInline from '../../components/guides/NewsletterInline.astro';
+import { getGuides, getTopics } from '../../lib/guides';
+import { getSettings, SITE_URL } from '../../lib/site';
+import { breadcrumbSchema, graph, personSchema } from '../../lib/seo';
+import { emph, plain } from '../../lib/text';
+
+const [guides, topics, settings] = await Promise.all([getGuides(), getTopics(), getSettings()]);
+const byTopic = topics.map((t) => ({
+  topic: t,
+  items: guides.filter((g) => g.data.topic === t.id).sort((a, b) => Number(b.data.pillar) - Number(a.data.pillar)),
+}));
+const featured = guides.find((g) => g.data.pillar) ?? guides[0];
+const topicName = (id: string) => topics.find((t) => t.id === id)?.data.name ?? '';
+
+const jsonLd = graph(
+  personSchema(settings),
+  {
+    '@type': 'CollectionPage',
+    name: 'Guías para crear webs que impactan, venden y posicionan',
+    url: `${SITE_URL}/guias`,
+    hasPart: guides.map((g) => ({ '@type': 'Article', headline: plain(g.data.title), url: `${SITE_URL}/guias/${g.id}` })),
+  },
+  breadcrumbSchema([
+    { name: 'Inicio', url: SITE_URL },
+    { name: 'Guías', url: `${SITE_URL}/guias` },
+  ]),
+);
+---
+
+<BaseLayout
+  title="Guías para crear tu web con IA, diseño, SEO y hosting · Iván García"
+  description="Guías prácticas para crear tu web con IA, diseñarla para convertir, posicionarla en Google, publicarla y automatizarla. Con vídeos, prompts y código para copiar."
+  pageType="guides_hub"
+  jsonLd={jsonLd}
+>
+  <header class="container gh-head">
+    <nav class="crumbs mono" aria-label="Migas de pan"><a href="/">Inicio</a> / <span aria-current="page">Guías</span></nav>
+    <h1 class="gh-head__title">Guías para una web que <em class="serif-em">impacta</em>, vende y posiciona</h1>
+    <p class="gh-head__intro">
+      Paso a paso, con vídeos, prompts y código para copiar. Todo lo que uso para crear webs con IA, explicado para que lo apliques hoy.
+    </p>
+    <nav class="topics-nav" aria-label="Temas">
+      <ul role="list">
+        {
+          byTopic.map(({ topic, items }) => (
+            <li>
+              <a href={`/guias/tema/${topic.id}`}>
+                {topic.data.name}
+                <span class="mono">{items.length}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </header>
+
+  {
+    featured && (
+      <section class="container gh-featured" aria-label="Guía destacada">
+        <GuideCard guide={featured} topicName={topicName(featured.data.topic)} size="lead" headingLevel="h2" />
+      </section>
+    )
+  }
+
+  {
+    byTopic.map(({ topic, items }, i) => (
+      <>
+        {items.length > 0 && (
+          <section class="section gh-topic" aria-labelledby={`t-${topic.id}`}>
+            <div class="container">
+              <div class="section-head">
+                <h2 id={`t-${topic.id}`} set:html={emph(topic.data.title)} />
+                <p>{topic.data.intro}</p>
+              </div>
+              <div class="gh-topic__grid">
+                {items.slice(0, 3).map((g) => (
+                  <GuideCard guide={g} />
+                ))}
+              </div>
+              <a class="gh-topic__all" href={`/guias/tema/${topic.id}`}>
+                Ver todas las guías de {topic.data.name} <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </section>
+        )}
+        {i === 1 && (
+          <div class="container gh-nl">
+            <NewsletterInline placement="guides_hub" />
+          </div>
+        )}
+      </>
+    ))
+  }
+</BaseLayout>
+
+<style>
+  .gh-head { padding-block: var(--s-7) var(--s-6); }
+  .crumbs { color: var(--c-meta); }
+  .crumbs a { color: var(--c-meta); }
+  .crumbs a:hover { color: var(--c-ink); }
+  .crumbs [aria-current] { color: var(--c-ink); }
+
+  .gh-head__title {
+    max-width: 18ch;
+    margin-top: var(--s-4);
+    font-size: clamp(2.75rem, 6.4vw, 6rem);
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+  }
+
+  .gh-head__title :global(.serif-em) {
+    background: var(--g-gold-text);
+    background-size: 220% 100%;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .gh-head__intro { max-width: 40rem; margin-top: var(--s-4); font-size: var(--fs-body-lg); }
+
+  .topics-nav { margin-top: var(--s-5); }
+  .topics-nav ul { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+
+  .topics-nav a {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-full);
+    color: var(--c-ink);
+    font-size: var(--fs-small);
+    transition: border-color var(--t-fast) ease;
+  }
+
+  .topics-nav a:hover { border-color: var(--c-gold-60); color: var(--c-ink); }
+  .topics-nav .mono { color: var(--c-gold); }
+
+  .gh-featured { padding-bottom: var(--s-7); }
+
+  .gh-topic__grid { display: grid; gap: var(--s-3); }
+
+  @media (width >= 56rem) {
+    .gh-topic__grid { grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+  }
+
+  .gh-topic__all {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    min-height: 44px;
+    margin-top: var(--s-4);
+    color: var(--c-gold);
+    font-size: var(--fs-small);
+    font-weight: 700;
+    transition: gap var(--t-fast) var(--ease);
+  }
+
+  .gh-topic__all:hover { gap: 14px; color: var(--c-gold-light); }
+
+  .gh-nl { max-width: calc(46rem + 2 * var(--gutter)); }
+</style>

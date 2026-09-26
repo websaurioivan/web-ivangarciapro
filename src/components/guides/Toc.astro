@@ -1,0 +1,98 @@
+---
+/**
+ * Toc · índice de contenidos. Escritorio: fijo en la columna lateral con la sección activa resaltada.
+ * Móvil: desplegable «Índice» al principio del artículo. H2 y H3.
+ */
+interface Props {
+  headings: { depth: number; slug: string; text: string }[];
+  variant: 'side' | 'inline';
+}
+const { headings, variant } = Astro.props;
+const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{
+  items.length > 1 &&
+    (variant === 'side' ? (
+      <nav class="toc toc--side" aria-label="Índice de contenidos">
+        <p class="toc__label mono">En esta guía</p>
+        <ol role="list">
+          {items.map((h) => (
+            <li class:list={[h.depth === 3 && 'is-sub']}>
+              <a href={`#${h.slug}`} data-toc-link={h.slug}>
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    ) : (
+      <details class="toc toc--inline">
+        <summary>
+          <span class="mono">Índice</span>
+          <span>{items.filter((h) => h.depth === 2).length} apartados</span>
+        </summary>
+        <ol role="list">
+          {items.map((h) => (
+            <li class:list={[h.depth === 3 && 'is-sub']}>
+              <a href={`#${h.slug}`}>{h.text}</a>
+            </li>
+          ))}
+        </ol>
+      </details>
+    ))
+}
+
+<style>
+  .toc ol { display: grid; gap: 2px; }
+
+  .toc a {
+    display: block;
+    padding: 6px 0 6px 14px;
+    border-left: 1px solid var(--c-line-strong);
+    color: var(--c-meta);
+    font-size: var(--fs-small);
+    line-height: 1.35;
+    transition: color var(--t-fast) ease, border-color var(--t-fast) ease;
+  }
+
+  .toc .is-sub a { padding-left: 28px; font-size: var(--fs-micro); }
+  .toc a:hover { color: var(--c-ink); }
+
+  .toc a[aria-current="true"] {
+    border-left-color: var(--c-gold);
+    color: var(--c-ink);
+  }
+
+  .toc__label { margin-bottom: var(--s-3); color: var(--c-meta); }
+
+  .toc--side {
+    position: sticky;
+    top: var(--s-6);
+    max-height: calc(100vh - var(--s-8));
+    overflow-y: auto;
+  }
+
+  .toc--inline {
+    margin-block: var(--s-5);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-md);
+    background: var(--c-surface);
+  }
+
+  .toc--inline summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 52px;
+    padding: 0 var(--s-4);
+    color: var(--c-ink);
+    font-size: var(--fs-small);
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .toc--inline summary::-webkit-details-marker { display: none; }
+  .toc--inline summary span:last-child { color: var(--c-meta); }
+  .toc--inline ol { padding: 0 var(--s-4) var(--s-4); }
+</style>

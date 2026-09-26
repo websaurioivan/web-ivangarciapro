@@ -1,0 +1,534 @@
+---
+/**
+ * /guias/[slug] · plantilla de artículo.
+ * Contenido: src/content/guides/*.mdoc (Keystatic → Guías). Bloques del cuerpo: markdoc.config.mjs.
+ */
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Toc from '../../components/guides/Toc.astro';
+import VideoHero from '../../components/guides/VideoHero.astro';
+import AuthorBox from '../../components/guides/AuthorBox.astro';
+import GuideCard from '../../components/guides/GuideCard.astro';
+import NewsletterInline from '../../components/guides/NewsletterInline.astro';
+import { getGuides, getTopics, readingTime, relatedFor, formatDate, isoDate, toSeconds, type Guide } from '../../lib/guides';
+import { getSettings, SITE_URL } from '../../lib/site';
+import { breadcrumbSchema, graph, personSchema } from '../../lib/seo';
+import { emph, plain } from '../../lib/text';
+
+export async function getStaticPaths() {
+  const guides = await getGuides();
+  return guides.map((guide) => ({ params: { slug: guide.id }, props: { guide } }));
+}
+
+interface Props {
+  guide: Guide;
+}
+const { guide } = Astro.props;
+const d = guide.data;
+const { Content, headings } = await render(guide);
+const [all, topics, settings] = await Promise.all([getGuides(), getTopics(), getSettings()]);
+const topic = topics.find((t) => t.id === d.topic);
+const related = relatedFor(guide, all);
+const pillar = !d.pillar ? all.find((g) => g.data.topic === d.topic && g.data.pillar) : undefined;
+const minutes = readingTime(guide);
+const updated = d.updatedAt ?? d.publishedAt;
+const url = `${SITE_URL}/guias/${guide.id}`;
+const titlePlain = plain(d.title);
+
+const jsonLd = graph(
+  personSchema(settings),
+  {
+    '@type': 'Article',
+    '@id': `${url}#article`,
+    headline: titlePlain,
+    description: d.description,
+    datePublished: isoDate(d.publishedAt),
+    dateModified: isoDate(updated),
+    author: { '@id': `${SITE_URL}/#ivan` },
+    publisher: { '@id': `${SITE_URL}/#ivan` },
+    mainEntityOfPage: url,
+    image: `${SITE_URL}/og/og-default.png`,
+    inLanguage: 'es-ES',
+    articleSection: topic?.data.name,
+    ...(d.keyword ? { keywords: d.keyword } : {}),
+  },
+  ...(d.youtubeId
+    ? [
+        {
+          '@type': 'VideoObject',
+          name: d.videoTitle || titlePlain,
+          description: d.description,
+          thumbnailUrl: `https://i.ytimg.com/vi/${d.youtubeId}/hqdefault.jpg`,
+          uploadDate: isoDate(d.publishedAt),
+          embedUrl: `https://www.youtube-nocookie.com/embed/${d.youtubeId}`,
+          contentUrl: `https://www.youtube.com/watch?v=${d.youtubeId}`,
+          ...(d.chapters.length
+            ? {
+                hasPart: d.chapters.map((c, i) => ({
+                  '@type': 'Clip',
+                  name: c.title,
+                  startOffset: toSeconds(c.time),
+                  ...(d.chapters[i + 1] ? { endOffset: toSeconds(d.chapters[i + 1]!.time) } : {}),
+                  url: `https://www.youtube.com/watch?v=${d.youtubeId}&t=${toSeconds(c.time)}`,
+                })),
+              }
+            : {}),
+        },
+      ]
+    : []),
+  ...(d.faq.length
+    ? [{ '@type': 'FAQPage', mainEntity: d.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }]
+    : []),
+  breadcrumbSchema([
+    { name: 'Inicio', url: SITE_URL },
+    { name: 'Guías', url: `${SITE_URL}/guias` },
+    ...(topic ? [{ name: topic.data.name, url: `${SITE_URL}/guias/tema/${topic.id}` }] : []),
+    { name: titlePlain, url },
+  ]),
+);
+---
+
+<BaseLayout title={d.seoTitle || `${titlePlain} · Iván García`} description={d.description} pageType="guide" jsonLd={jsonLd}>
+  <div class="progress" aria-hidden="true"><span data-progress-bar></span></div>
+
+  <article class="gd" data-guide={guide.id}>
+    <header class="container gd__head">
+      <nav class="crumbs mono" aria-label="Migas de pan">
+        <a href="/">Inicio</a> / <a href="/guias">Guías</a>
+        {topic && (<> / <a href={`/guias/tema/${topic.id}`}>{topic.data.name}</a></>)}
+      </nav>
+      {
+        d.example && (
+          <p class="gd__example mono">Artículo de ejemplo para revisar el diseño · [contenido pendiente de revisión por Iván]</p>
+        )
+      }
+      <h1 class="gd__title" set:html={emph(d.title, 'gd__em')} />
+      <p class="gd__excerpt">{d.excerpt}</p>
+      <p class="gd__meta mono">
+        <span>Por Iván García</span>
+        <span aria-hidden="true">·</span>
+        <span>{d.updatedAt ? 'Actualizada' : 'Publicada'} el <time datetime={updated.toISOString()}>{formatDate(updated)}</time></span>
+        <span aria-hidden="true">·</span>
+        <span>{minutes} min de lectura</span>
+      </p>
+    </header>
+
+    <div class="container gd__grid">
+      <div class="gd__main">
+        {
+          d.tldr.length > 0 && (
+            <section class="tldr" aria-labelledby="tldr-title">
+              <h2 id="tldr-title" class="tldr__title mono">En 30 segundos</h2>
+              <ul role="list">
+                {d.tldr.map((t) => (
+                  <li>
+                    <span aria-hidden="true">✓</span> {t}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+
+        {(d.youtubeId || d.chapters.length > 0) && (
+          <VideoHero youtubeId={d.youtubeId} title={d.videoTitle || titlePlain} chapters={d.chapters} slug={guide.id} />
+        )}
+
+        <div class="gd__toc-inline"><Toc headings={headings} variant="inline" /></div>
+
+        <div class="prose" data-guide-body>
+          <Content />
+        </div>
+
+        {
+          d.faq.length > 0 && (
+            <section class="gfaq" aria-labelledby="gfaq-title">
+              <h2 id="gfaq-title">Preguntas frecuentes</h2>
+              {d.faq.map((f) => (
+                <details class="gfaq__item" name={`faq-${guide.id}`}>
+                  <summary>
+                    <span>{f.q}</span>
+                    <span class="gfaq__icon" aria-hidden="true">+</span>
+                  </summary>
+                  <p>{f.a}</p>
+                </details>
+              ))}
+            </section>
+          )
+        }
+
+        <NewsletterInline placement="guide_end" />
+
+        {
+          pillar && (
+            <p class="gd__pillar">
+              <span class="mono">Guía completa del tema</span>
+              <a href={`/guias/${pillar.id}`} set:html={`${emph(pillar.data.title)} →`} />
+            </p>
+          )
+        }
+
+        <AuthorBox />
+      </div>
+
+      <aside class="gd__side">
+        <Toc headings={headings} variant="side" />
+      </aside>
+    </div>
+
+    {
+      related.length > 0 && (
+        <section class="section gd__related" aria-labelledby="related-title">
+          <div class="container">
+            <h2 id="related-title" class="gd__related-title">
+              Sigue <em class="serif-em">aprendiendo</em>
+            </h2>
+            <div class="gd__related-grid">
+              {related.map((g) => (
+                <GuideCard guide={g} topicName={topics.find((t) => t.id === g.data.topic)?.data.name} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<script>
+  import { track } from '../../lib/analytics';
+
+  const root = document.querySelector<HTMLElement>('[data-guide]');
+  if (root) {
+    const slug = root.dataset.guide!;
+
+    // ── Copiar (código, prompts, enlace a sección) ──
+    const flash = (btn: HTMLElement, text: string) => {
+      const label = btn.querySelector<HTMLElement>('[data-copy-label]') ?? btn;
+      const prev = label.textContent;
+      label.textContent = text;
+      btn.setAttribute('data-done', '');
+      setTimeout(() => { label.textContent = prev; btn.removeAttribute('data-done'); }, 1600);
+    };
+    const copy = async (text: string) => {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        // Alternativa para navegadores sin permiso de portapapeles
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        ta.remove();
+        return ok;
+      }
+    };
+    root.addEventListener('click', async (e) => {
+      const t = e.target as HTMLElement;
+      const codeBtn = t.closest<HTMLElement>('[data-copy-code]');
+      const promptBtn = t.closest<HTMLElement>('[data-copy-prompt]');
+      const linkBtn = t.closest<HTMLElement>('[data-copy-link]');
+      if (codeBtn) {
+        const code = codeBtn.closest('[data-copy-block]')?.querySelector('pre')?.innerText ?? '';
+        flash(codeBtn, (await copy(code)) ? '✓ Copiado' : 'No se pudo copiar');
+        track('cta_click', { cta_id: 'copy_code', placement: slug, intent: 'learn' });
+      } else if (promptBtn) {
+        const src = promptBtn.closest('[data-copy-block]')?.querySelector<HTMLElement>('[data-copy-source]');
+        flash(promptBtn, (await copy(src?.innerText.trim() ?? '')) ? '✓ Copiado' : 'No se pudo copiar');
+        track('cta_click', { cta_id: 'copy_prompt', placement: slug, intent: 'learn' });
+      } else if (linkBtn) {
+        const url = `${location.origin}${location.pathname}#${linkBtn.dataset.copyLink}`;
+        history.replaceState(null, '', `#${linkBtn.dataset.copyLink}`);
+        if (await copy(url)) {
+          linkBtn.setAttribute('aria-label', 'Enlace copiado');
+          setTimeout(() => linkBtn.setAttribute('aria-label', 'Copiar enlace a esta sección'), 1600);
+        }
+      }
+    });
+
+    // ── Afiliados dentro del contenido: origen = esta guía ──
+    root.querySelectorAll<HTMLElement>('[data-affiliate]').forEach((a) => (a.dataset.sourceSlug = slug));
+
+    // ── Vídeo: fachada + saltos al minuto ──
+    const media = root.querySelector<HTMLElement>('[data-video]');
+    const load = (start = 0) => {
+      if (!media) return;
+      const id = media.dataset.video!;
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0&start=${start}`;
+      iframe.title = media.dataset.videoTitle ?? 'Vídeo';
+      iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      iframe.allowFullscreen = true;
+      media.replaceChildren(iframe);
+      track('video_play', { video_id: id, source_slug: slug });
+    };
+    root.querySelector('[data-video-play]')?.addEventListener('click', () => load(0));
+    root.querySelectorAll<HTMLButtonElement>('[data-video-seek]').forEach((b) => {
+      if (media) b.hidden = false;
+      b.addEventListener('click', () => {
+        load(Number(b.dataset.videoSeek) || 0);
+        media?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+      });
+    });
+
+    // ── Índice: sección activa ──
+    const links = new Map([...root.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')].map((a) => [a.dataset.tocLink!, a]));
+    if (links.size) {
+      const heads = [...root.querySelectorAll<HTMLElement>('[data-guide-body] h2[id], [data-guide-body] h3[id]')];
+      const setActive = (id: string) => links.forEach((a, k) => a.setAttribute('aria-current', String(k === id)));
+      const io = new IntersectionObserver(
+        (entries) => {
+          const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          if (visible[0]) setActive(visible[0].target.id);
+        },
+        { rootMargin: '0px 0px -70% 0px' },
+      );
+      heads.forEach((h) => io.observe(h));
+    }
+
+    // ── Barra de progreso de lectura ──
+    const bar = document.querySelector<HTMLElement>('[data-progress-bar]');
+    const body = root.querySelector<HTMLElement>('[data-guide-body]');
+    if (bar && body) {
+      let ticking = false;
+      const update = () => {
+        const r = body.getBoundingClientRect();
+        const p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - innerHeight * 0.6)));
+        bar.style.transform = `scaleX(${p})`;
+        ticking = false;
+      };
+      addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+      update();
+    }
+  }
+</script>
+
+<style>
+  .progress {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: var(--z-sticky);
+    height: 2px;
+    pointer-events: none;
+  }
+
+  .progress span {
+    display: block;
+    height: 100%;
+    background: var(--c-gold);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  /* Cabecera */
+  .gd__head { padding-block: var(--s-7) var(--s-5); }
+  .crumbs { color: var(--c-meta); }
+  .crumbs a { color: var(--c-meta); }
+  .crumbs a:hover { color: var(--c-ink); }
+
+  .gd__example {
+    display: inline-block;
+    margin-top: var(--s-4);
+    padding: 6px 12px;
+    border: 1px dashed var(--c-gold-45);
+    border-radius: var(--r-sm);
+    color: var(--c-gold-light);
+  }
+
+  .gd__title {
+    max-width: 20ch;
+    margin-top: var(--s-4);
+    font-size: clamp(2.5rem, 5.6vw, 5rem);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+  }
+
+  .gd__title :global(.gd__em) { color: var(--c-gold); }
+  .gd__excerpt { max-width: 44rem; margin-top: var(--s-4); font-size: var(--fs-body-lg); }
+
+  .gd__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-top: var(--s-4);
+    color: var(--c-meta);
+  }
+
+  /* Rejilla: contenido + índice lateral */
+  .gd__grid { display: grid; gap: var(--s-6); padding-bottom: var(--s-8); }
+  .gd__main { min-width: 0; max-width: 46rem; }
+  .gd__side { display: none; }
+
+  @media (width >= 64rem) {
+    .gd__grid { grid-template-columns: minmax(0, 46rem) 1fr; gap: clamp(48px, 7vw, 120px); }
+    .gd__side { display: block; }
+    .gd__toc-inline { display: none; }
+  }
+
+  /* En 30 segundos */
+  .tldr {
+    padding: var(--s-4) var(--s-5);
+    border: 1px solid var(--c-gold-28);
+    border-radius: var(--r-lg);
+    background: var(--c-gold-06);
+  }
+
+  .tldr__title { color: var(--c-gold); font-family: var(--f-mono); font-size: var(--fs-mono); font-weight: 500; letter-spacing: 0.02em; }
+  .tldr ul { display: grid; gap: var(--s-2); margin-top: var(--s-3); }
+  .tldr li { color: var(--c-ink); font-size: var(--fs-small); }
+  .tldr li span { margin-right: 8px; color: var(--c-gold); }
+
+  /* Cuerpo del artículo */
+  .prose { font-size: 1.125rem; line-height: 1.75; }
+  .prose > :global(div > * + *) { margin-top: var(--s-4); }
+
+  .prose :global(h2) {
+    margin-top: var(--s-7);
+    font-size: clamp(1.75rem, 3.2vw, 2.5rem);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+
+  .prose :global(h3) {
+    margin-top: var(--s-6);
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+
+  .prose :global(p),
+  .prose :global(li) { color: var(--c-text); }
+
+  .prose :global(strong) { color: var(--c-ink); font-weight: 700; }
+
+  .prose :global(a:not([class])) {
+    color: var(--c-gold);
+    text-decoration: underline;
+    text-decoration-color: var(--c-gold-45);
+    text-underline-offset: 3px;
+  }
+
+  .prose :global(a:not([class]):hover) { color: var(--c-gold-light); }
+  .prose :global(ul:not([role])),
+  .prose :global(ol:not([role])) { padding-left: 1.25em; }
+  .prose :global(li + li) { margin-top: var(--s-2); }
+  .prose :global(ul:not([role]) > li::marker) { color: var(--c-gold); }
+
+  .prose :global(:not(pre) > code) {
+    padding: 2px 6px;
+    border-radius: var(--r-sm);
+    background: var(--c-surface-2);
+    color: var(--c-ink);
+    font-family: var(--f-mono);
+    font-size: 0.875em;
+  }
+
+  .prose :global(blockquote) {
+    margin-inline: 0;
+    padding-left: var(--s-4);
+    border-left: 2px solid var(--c-gold);
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: 1.375rem;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+  }
+
+  .prose :global(hr) { border: 0; border-top: 1px solid var(--c-line); margin-block: var(--s-7); }
+
+  .prose :global(img) {
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-md);
+  }
+
+  /* Tablas: línea fina, scroll horizontal propio en móvil */
+  .prose :global(table) {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: var(--fs-small);
+  }
+
+  .prose :global(th) {
+    padding: var(--s-2) var(--s-3) var(--s-2) 0;
+    border-bottom: 1px solid var(--c-line-strong);
+    color: var(--c-meta);
+    font-family: var(--f-mono);
+    font-size: var(--fs-mono);
+    font-weight: 400;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .prose :global(td) {
+    padding: var(--s-3) var(--s-3) var(--s-3) 0;
+    border-bottom: 1px solid var(--c-line);
+    color: var(--c-ink);
+    vertical-align: top;
+  }
+
+  /* FAQ de la guía */
+  .gfaq { margin-top: var(--s-7); }
+  .gfaq h2 { margin-bottom: var(--s-4); font-size: clamp(1.75rem, 3.2vw, 2.5rem); letter-spacing: -0.03em; }
+  .gfaq__item { border-bottom: 1px solid var(--c-line); }
+  .gfaq__item:first-of-type { border-top: 1px solid var(--c-line); }
+
+  .gfaq__item summary {
+    display: flex;
+    gap: var(--s-4);
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    padding-block: var(--s-3);
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: 1.125rem;
+    font-weight: 500;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .gfaq__item summary::-webkit-details-marker { display: none; }
+  .gfaq__icon { color: var(--c-gold); font-size: 1.5rem; transition: transform var(--t-med) var(--ease); }
+  .gfaq__item[open] .gfaq__icon { transform: rotate(45deg); }
+  .gfaq__item p { padding-bottom: var(--s-3); font-size: var(--fs-small); }
+
+  /* Pilar + relacionadas */
+  .gd__pillar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: var(--s-5);
+  }
+
+  .gd__pillar .mono { color: var(--c-meta); }
+
+  .gd__pillar a {
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: 1.375rem;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+
+  .gd__pillar a:hover { color: var(--c-gold); }
+
+  .gd__related-title { margin-bottom: var(--s-6); }
+
+  .gd__related-grid { display: grid; gap: var(--s-3); }
+
+  @media (width >= 56rem) {
+    .gd__related-grid { grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+  }
+</style>

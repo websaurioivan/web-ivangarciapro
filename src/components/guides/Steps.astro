@@ -1,0 +1,55 @@
+---
+/**
+ * Steps (Markdoc) · envuelve una lista numerada y la muestra como pasos con número en contorno (manual).
+ * {% steps %}
+ * 1. **Título del paso.** Descripción…
+ * 2. …
+ * {% /steps %}
+ */
+---
+
+<div class="gs"><slot /></div>
+
+<style>
+  .gs { margin-block: var(--s-5); }
+
+  .gs :global(ol) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .gs :global(ol > li) {
+    position: relative;
+    min-height: 64px;
+    padding: var(--s-4) 0 var(--s-4) 88px;
+    border-bottom: 1px solid var(--c-line);
+    counter-increment: step;
+  }
+
+  .gs :global(ol > li:first-child) { border-top: 1px solid var(--c-line); }
+
+  .gs :global(ol > li)::before {
+    position: absolute;
+    top: var(--s-3);
+    left: 0;
+    color: transparent;
+    font-family: var(--f-serif);
+    font-size: 3.5rem;
+    font-style: italic;
+    line-height: 1;
+    content: counter(step, decimal-leading-zero);
+    -webkit-text-stroke: 1px var(--c-gold-60);
+  }
+
+  .gs :global(ol > li strong:first-child) {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+</style>

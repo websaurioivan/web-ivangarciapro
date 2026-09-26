@@ -1,0 +1,101 @@
+---
+/**
+ * ToolCard (Markdoc) · herramienta recomendada. Si es de afiliado: rel="sponsored", aviso visible
+ * y evento affiliate_click con la guía de origen (data-source-slug se completa en el cliente).
+ * {% tool name="Hostinger" url="…" description="…" affiliate=true cta="Crear mi web con Hostinger" /%}
+ */
+interface Props {
+  name: string;
+  url: string;
+  description?: string;
+  affiliate?: boolean;
+  cta?: string;
+}
+const { name, url, description = '', affiliate = false, cta = 'Ver herramienta' } = Astro.props;
+const partner = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+---
+
+<aside class:list={['tc2', affiliate && 'tc2--aff']} aria-label={`Herramienta: ${name}`}>
+  {affiliate && <div class="tc2__glow" aria-hidden="true" />}
+  <p class="tc2__kind mono">{affiliate ? 'La que uso yo' : 'Herramienta'}</p>
+  <p class="tc2__name">{name}</p>
+  {description && <p class="tc2__desc">{description}</p>}
+  <div class="tc2__foot">
+    <a
+      href={url}
+      class="tc2__link"
+      target="_blank"
+      rel={affiliate ? 'sponsored noopener' : 'noopener'}
+      data-affiliate={affiliate ? partner : undefined}
+      data-source-type={affiliate ? 'guide' : undefined}
+      data-placement={affiliate ? 'guide_tool' : undefined}
+      data-cta={affiliate ? undefined : `guide_tool_${partner}`}
+    >
+      {cta} <span aria-hidden="true">→</span>
+      <span class="visually-hidden">(se abre en una pestaña nueva{affiliate ? ', enlace de afiliado' : ''})</span>
+    </a>
+    {affiliate && <span class="tc2__disc">Enlace de afiliado: yo gano comisión, tú no pagas más.</span>}
+  </div>
+</aside>
+
+<style>
+  .tc2 {
+    position: relative;
+    margin-block: var(--s-5);
+    padding: var(--s-4) var(--s-5);
+    overflow: hidden;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: var(--c-surface);
+  }
+
+  .tc2--aff { border-color: var(--c-gold-28); }
+
+  .tc2__glow {
+    position: absolute;
+    top: -140px;
+    right: -120px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: var(--g-glow);
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .tc2 > :not(.tc2__glow) { position: relative; }
+  .tc2__kind { color: var(--c-meta); }
+
+  .tc2__name {
+    margin-top: var(--s-1);
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  .tc2__desc { margin-top: var(--s-2); font-size: var(--fs-small); }
+
+  .tc2__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px var(--s-4);
+    align-items: center;
+    margin-top: var(--s-3);
+  }
+
+  .tc2__link {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    min-height: 44px;
+    color: var(--c-gold);
+    font-size: var(--fs-small);
+    font-weight: 700;
+    transition: gap var(--t-fast) var(--ease), color var(--t-fast) ease;
+  }
+
+  .tc2__link:hover { gap: 14px; color: var(--c-gold-light); }
+  .tc2__disc { color: var(--c-meta); font-size: var(--fs-micro); }
+</style>

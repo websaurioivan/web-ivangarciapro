@@ -1,0 +1,185 @@
+---
+/**
+ * /guias/tema/[topic] · hub de un tema: guía pilar destacada + resto de guías en lista editorial + newsletter.
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import GuideCard from '../../../components/guides/GuideCard.astro';
+import NewsletterInline from '../../../components/guides/NewsletterInline.astro';
+import { getGuides, getTopics, readingTime, formatDate, type Topic } from '../../../lib/guides';
+import { getSettings, SITE_URL } from '../../../lib/site';
+import { breadcrumbSchema, graph, personSchema } from '../../../lib/seo';
+import { emph, plain } from '../../../lib/text';
+
+export async function getStaticPaths() {
+  const topics = await getTopics();
+  return topics.map((topic) => ({ params: { topic: topic.id }, props: { topic } }));
+}
+
+interface Props {
+  topic: Topic;
+}
+const { topic } = Astro.props;
+const [all, topics, settings] = await Promise.all([getGuides(), getTopics(), getSettings()]);
+const items = all.filter((g) => g.data.topic === topic.id);
+const pillar = items.find((g) => g.data.pillar);
+const rest = items.filter((g) => g !== pillar);
+const url = `${SITE_URL}/guias/tema/${topic.id}`;
+const others = topics.filter((t) => t.id !== topic.id);
+
+const jsonLd = graph(
+  personSchema(settings),
+  {
+    '@type': 'CollectionPage',
+    name: plain(topic.data.title),
+    description: topic.data.description,
+    url,
+    hasPart: items.map((g) => ({ '@type': 'Article', headline: plain(g.data.title), url: `${SITE_URL}/guias/${g.id}` })),
+  },
+  breadcrumbSchema([
+    { name: 'Inicio', url: SITE_URL },
+    { name: 'Guías', url: `${SITE_URL}/guias` },
+    { name: topic.data.name, url },
+  ]),
+);
+---
+
+<BaseLayout title={`${topic.data.name}: guías · Iván García`} description={topic.data.description} pageType="guides_topic" jsonLd={jsonLd}>
+  <header class="container th-head">
+    <nav class="crumbs mono" aria-label="Migas de pan">
+      <a href="/">Inicio</a> / <a href="/guias">Guías</a> / <span aria-current="page">{topic.data.name}</span>
+    </nav>
+    <h1 class="th-head__title" set:html={emph(topic.data.title)} />
+    <p class="th-head__intro">{topic.data.intro}</p>
+    <p class="th-head__count mono">{items.length} {items.length === 1 ? 'guía' : 'guías'}</p>
+  </header>
+
+  {
+    pillar && (
+      <section class="container th-pillar" aria-label="Guía pilar">
+        <GuideCard guide={pillar} size="lead" headingLevel="h2" />
+      </section>
+    )
+  }
+
+  {
+    rest.length > 0 && (
+      <section class="section" aria-labelledby="th-list">
+        <div class="container th-list-wrap">
+          <h2 id="th-list" class="th-list__title mono">Todas las guías</h2>
+          <ol role="list" class="th-list">
+            {rest.map((g) => (
+              <li>
+                <a href={`/guias/${g.id}`} class="th-row">
+                  <span class="th-row__title" set:html={emph(g.data.title)} />
+                  <span class="th-row__excerpt">{g.data.excerpt}</span>
+                  <span class="th-row__meta mono">
+                    {readingTime(g)} min · {formatDate(g.data.updatedAt ?? g.data.publishedAt)}
+                  </span>
+                  <span class="th-row__arrow" aria-hidden="true">→</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    )
+  }
+
+  <div class="container th-nl">
+    <NewsletterInline placement={`topic_${topic.id}`} />
+  </div>
+
+  <nav class="section th-others" aria-labelledby="th-others">
+    <div class="container">
+      <h2 id="th-others" class="th-others__title">Otros <em class="serif-em">temas</em></h2>
+      <ul role="list">
+        {
+          others.map((t) => (
+            <li>
+              <a href={`/guias/tema/${t.id}`}>
+                {t.data.name} <span aria-hidden="true">→</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </nav>
+</BaseLayout>
+
+<style>
+  .th-head { padding-block: var(--s-7) var(--s-6); }
+  .crumbs { color: var(--c-meta); }
+  .crumbs a { color: var(--c-meta); }
+  .crumbs a:hover { color: var(--c-ink); }
+  .crumbs [aria-current] { color: var(--c-ink); }
+
+  .th-head__title {
+    margin-top: var(--s-4);
+    font-size: clamp(3rem, 7vw, 6.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+  }
+
+  .th-head__title :global(.serif-em) { color: var(--c-gold); }
+  .th-head__intro { max-width: 40rem; margin-top: var(--s-4); font-size: var(--fs-body-lg); }
+  .th-head__count { margin-top: var(--s-3); color: var(--c-meta); }
+
+  .th-pillar { padding-bottom: var(--s-7); }
+
+  .th-list__title { margin-bottom: var(--s-4); color: var(--c-meta); font-family: var(--f-mono); font-size: var(--fs-mono); font-weight: 400; }
+  .th-list { border-top: 1px solid var(--c-line); }
+
+  .th-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--s-2) var(--s-4);
+    padding-block: var(--s-5);
+    border-bottom: 1px solid var(--c-line);
+    color: var(--c-text);
+  }
+
+  .th-row:hover { color: var(--c-text); }
+
+  .th-row__title {
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-size: clamp(1.375rem, 2.4vw, 2rem);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+
+  .th-row__excerpt { grid-column: 1; max-width: 44rem; font-size: var(--fs-small); }
+  .th-row__meta { grid-column: 1; color: var(--c-meta); }
+
+  .th-row__arrow {
+    grid-row: 1 / span 3;
+    grid-column: 2;
+    align-self: center;
+    color: var(--c-gold);
+    font-size: 1.5rem;
+    transition: transform var(--t-fast) var(--ease);
+  }
+
+  .th-row:hover .th-row__arrow { transform: translateX(6px); }
+  .th-row:hover .th-row__title { color: var(--c-gold-light); }
+
+  .th-nl { max-width: calc(46rem + 2 * var(--gutter)); margin-block: var(--s-7); }
+
+  .th-others__title { margin-bottom: var(--s-4); font-size: var(--fs-h3); font-weight: 500; }
+  .th-others ul { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+
+  .th-others a {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-full);
+    font-size: var(--fs-small);
+  }
+
+  .th-others a:hover { border-color: var(--c-gold-60); color: var(--c-ink); }
+</style>

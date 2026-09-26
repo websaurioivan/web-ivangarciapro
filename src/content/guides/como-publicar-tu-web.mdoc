@@ -1,0 +1,65 @@
+---
+title: Cómo *publicar* tu web paso a paso
+description: Cómo publicar tu web en internet paso a paso - elegir hosting y dominio, subir los archivos, activar HTTPS y comprobar que todo funciona.
+excerpt: Tienes la web hecha y ahora quieres que cualquiera pueda verla. Este es el proceso completo, sin tecnicismos.
+topic: publicar-y-hosting
+pillar: true
+keyword: cómo publicar una web
+publishedAt: 2026-09-20
+example: true
+videoTitle: '[Título del vídeo: publico mi web en Hostinger]'
+chapters:
+  - time: '0:00'
+    title: Qué necesitas para publicar
+  - time: '2:30'
+    title: Contratar hosting y dominio
+  - time: '6:15'
+    title: Subir la web
+  - time: '10:40'
+    title: Activar HTTPS y comprobar
+tldr:
+  - Para publicar necesitas un hosting (dónde vive tu web) y un dominio (su dirección).
+  - Sube los archivos de tu web al hosting o conéctalo con tu repositorio.
+  - Activa HTTPS y revisa la web en el móvil.
+faq:
+  - q: ¿Qué diferencia hay entre hosting y dominio?
+    a: El hosting es el espacio donde se guardan los archivos de tu web. El dominio es la dirección que la gente escribe para visitarla, como tuweb.com.
+  - q: ¿Necesito conocimientos técnicos para publicar?
+    a: No demasiados. Los hostings actuales tienen paneles sencillos para subir la web, conectar el dominio y activar HTTPS.
+---
+Publicar tu web es darle una dirección en internet para que cualquiera pueda visitarla. Necesitas dos cosas: **hosting** y **dominio**.
+
+## Hosting y dominio, en una frase
+
+- **Hosting:** el ordenador siempre encendido donde viven los archivos de tu web.
+- **Dominio:** la dirección que la gente escribe para llegar, como `tuweb.com`.
+
+## El proceso
+
+{% steps %}
+1. **Contrata hosting y dominio.** Muchos hostings incluyen el dominio el primer año.
+2. **Sube tu web.** Desde el panel del hosting o conectando tu repositorio de GitHub.
+3. **Conecta el dominio.** Si lo compraste en el mismo sitio, suele quedar conectado solo.
+4. **Activa HTTPS.** El candado del navegador; hoy es obligatorio.
+5. **Compruébalo todo.** Abre la web en el móvil y en el ordenador, y prueba los formularios.
+{% /steps %}
+
+{% moment time="2:30" label="Ver cómo contrato el hosting" /%}
+
+{% tool name="Hostinger" url="https://www.hostinger.com/es/refer?REFERRALCODE=IVANGARCIAPRO" description="El hosting que uso para mis webs, incluida esta. Panel sencillo, HTTPS incluido y despliegue desde GitHub." affiliate=true cta="Crear mi web con Hostinger" /%}
+
+## Forzar HTTPS
+
+Si tu hosting usa Apache o LiteSpeed, esta regla en el archivo `.htaccess` redirige todas las visitas a la versión segura:
+
+```apache
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+```
+
+{% callout type="tip" title="Antes de celebrarlo" %}
+Da de alta tu web en Google Search Console y envía el sitemap. Así Google la descubre antes.
+{% /callout %}
+
+{% newsletter title="Publica y *mejora* cada semana" text="Cada semana comparto herramientas y trucos para publicar, acelerar y mejorar tu web, con los pasos exactos que sigo." /%}

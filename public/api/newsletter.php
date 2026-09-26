@@ -26,7 +26,7 @@ if (!$email) {
 
 $ok = ig_mailerlite_subscribe($CONFIG, $email, 'newsletter', [
     'name' => ig_clean('name', 80),
-    'source' => ig_clean('source', 60),
+    'source' => ig_clean('source', 160),
     'placement' => ig_clean('placement', 60),
     'lead_magnet' => ig_clean('lead_magnet', 80),
 ]);

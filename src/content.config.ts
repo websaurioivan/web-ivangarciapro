@@ -95,6 +95,40 @@ const gift = defineCollection({
   }),
 });
 
+const topics = defineCollection({
+  loader: glob({ pattern: '*.yaml', base: './src/content/topics' }),
+  schema: z.object({
+    title: z.string(),
+    name: z.string(),
+    description: z.string(),
+    intro: z.string(),
+    order: z.number().int(),
+  }),
+});
+
+const guides = defineCollection({
+  loader: glob({ pattern: '*.mdoc', base: './src/content/guides' }),
+  schema: z.object({
+    title: z.string(),
+    seoTitle: z.string().optional().default(''),
+    description: z.string(),
+    excerpt: z.string(),
+    topic: z.string(),
+    pillar: z.boolean().default(false),
+    keyword: z.string().optional().default(''),
+    publishedAt: z.coerce.date(),
+    updatedAt: z.coerce.date().optional(),
+    draft: z.boolean().default(false),
+    example: z.boolean().default(false),
+    youtubeId: z.string().optional().default(''),
+    videoTitle: z.string().optional().default(''),
+    chapters: z.array(z.object({ time: z.string(), title: z.string() })).default([]),
+    tldr: z.array(z.string()).default([]),
+    related: z.array(z.string()).default([]),
+    faq: z.array(z.object({ q: z.string(), a: z.string() })).default([]),
+  }),
+});
+
 const section = z.object({ title: z.string(), intro: z.string() });
 
 const disenoWeb = defineCollection({
@@ -197,4 +231,4 @@ const resources = defineCollection({
   }),
 });
 
-export const collections = { settings, home, disenoWeb, gift, services, testimonials, cases, resources };
+export const collections = { settings, home, disenoWeb, gift, topics, guides, services, testimonials, cases, resources };

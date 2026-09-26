@@ -1,0 +1,57 @@
+---
+/**
+ * VideoMoment (Markdoc) · «Ver este paso en el vídeo»: abre el vídeo de la cabecera en el minuto exacto.
+ * {% moment time="3:20" label="Ver este paso en el vídeo" /%}
+ * Si la guía no tiene vídeo, el botón no aparece (lo muestra el script del layout).
+ */
+interface Props {
+  time: string;
+  label?: string;
+}
+const { time, label = 'Ver este paso en el vídeo' } = Astro.props;
+const seconds = time
+  .split(':')
+  .map(Number)
+  .reduce((acc, n) => acc * 60 + (Number.isFinite(n) ? n : 0), 0);
+---
+
+<button type="button" class="vm" data-video-seek={String(seconds)} hidden>
+  <span class="vm__play" aria-hidden="true">
+    <svg viewBox="0 0 12 12"><path d="M3.5 1.8v8.4L10 6z"></path></svg>
+  </span>
+  {label}
+  <span class="vm__time mono">{time}</span>
+</button>
+
+<style>
+  .vm {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    min-height: 44px;
+    margin-block: var(--s-2) var(--s-4);
+    padding: 4px 16px 4px 6px;
+    border: 1px solid var(--c-gold-28);
+    border-radius: var(--r-full);
+    background: var(--c-gold-06);
+    color: var(--c-ink);
+    font-size: var(--fs-small);
+    font-weight: 500;
+    transition: border-color var(--t-fast) ease;
+  }
+
+  .vm[hidden] { display: none; }
+  .vm:hover { border-color: var(--c-gold-60); }
+
+  .vm__play {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--c-gold);
+  }
+
+  .vm__play svg { width: 11px; height: 11px; margin-left: 2px; fill: var(--c-on-gold); }
+  .vm__time { color: var(--c-gold); }
+</style>

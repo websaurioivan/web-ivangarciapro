@@ -1,0 +1,47 @@
+---
+title: Checklist de SEO técnico *antes de publicar*
+description: Checklist de SEO técnico para revisar antes de publicar tu web - títulos, descripciones, sitemap, robots, velocidad, móvil y datos estructurados.
+excerpt: Revisa esto antes de publicar y te ahorrarás problemas con Google desde el primer día.
+topic: seo-y-google
+keyword: checklist SEO técnico
+publishedAt: 2026-09-21
+example: true
+tldr:
+  - Un título y una descripción únicos por página.
+  - Sitemap y robots.txt correctos.
+  - HTTPS, móvil y velocidad revisados.
+---
+Antes de publicar, repasa esta lista. Son los errores técnicos más comunes y los más fáciles de evitar.
+
+## La checklist
+
+{% steps %}
+1. **Títulos únicos.** Cada página con su `title`, de unos 50–60 caracteres.
+2. **Descripciones.** Una meta description por página que invite a hacer clic.
+3. **Un solo H1.** El titular principal de cada página, con la palabra clave.
+4. **HTTPS.** Toda la web con certificado y redirección desde http.
+5. **Sitemap.** Generado y enviado a Google Search Console.
+6. **Robots.txt.** Que no bloquee por error las páginas que quieres posicionar.
+7. **Móvil.** Revisa cada página en el móvil, no solo en el ordenador.
+8. **Velocidad.** Imágenes optimizadas y nada que no uses.
+{% /steps %}
+
+## Datos estructurados
+
+Ayudan a Google a entender qué es tu página. Un ejemplo básico para un negocio:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Tu negocio",
+  "url": "https://tuweb.com",
+  "telephone": "+34 600 000 000"
+}
+```
+
+{% callout type="error" title="El error que más veo" %}
+Publicar con la web bloqueada a Google (un «noindex» o un robots.txt de pruebas que nadie quitó). Revísalo siempre tras publicar.
+{% /callout %}
+
+{% newsletter /%}
